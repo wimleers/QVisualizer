@@ -3,6 +3,11 @@
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
+#include <QSqlError>
+
+#include <QDebug>
+#include <QProcess>
+#include <QDir>
 
 class Database {
     private:
