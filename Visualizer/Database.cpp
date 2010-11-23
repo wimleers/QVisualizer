@@ -1,29 +1,45 @@
 #include "Database.h"
 
 Database::Database() {
-    #ifdef Q_OS_WIN32
     QProcess p;
-    p.start("cmd.exe", QStringList() << "/c sqlite3 db.sqlite < sql.sql && sqlite3 db.sqlite");
+    static QString command = "sqlite3 db.sqlite < sql.sql; sqlite3 db.sqlite";
+
+#ifdef Q_OS_WIN32
+    p.start(QString("cmd.exe /c %1").arg(command));
+#else
+    p.start(QString("sh -c \"%1\"").arg(command));
+#endif
 
     if (p.waitForStarted(500)) {
-    p.write(".separator '|'\r\n");
-    p.write(".import events.csv Events\r\n");
-    p.waitForFinished(1000);
-    //qDebug() << p.readAllStandardOutput();
+        p.write(".separator ','\r\n");
+        p.write(".import events.csv Events\r\n");
+        p.waitForFinished(1000);
+        qDebug() << p.readAllStandardOutput();
     }
     else
-       qDebug() << "Failed to start cmd.exe";
-    #endif
+       qDebug() << "Failed to import recorded events into SQLite database.";
+    p.close();
 
-    db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName("./db.sqlite");
-    if (!db.open()) {
-        qDebug() << "Database connection could not be established: " << db.lastError().text();
+    this->db = QSqlDatabase::addDatabase("QSQLITE");
+    this->db.setDatabaseName("./db.sqlite");
+    if (!this->db.open()) {
+        qDebug() << "Database connection could not be established: " << this->db.lastError().text();
         exit(1);
+    }
+
+    // Sample query.
+    QSqlQuery q(this->db);
+    q.exec("SELECT * FROM Events;");
+    while (q.next()) {
+        qDebug() << "row" << q.at();
+        for (int i = 0; i < 5; i++) {
+            qDebug() << q.value(i);
+        }
     }
 }
 
 void Database::close() {
-    db = QSqlDatabase();
-    db.close();
+    if (this->db.isOpen())
+        this->db.close();
+//    this->db.removeDatabase();
 }
