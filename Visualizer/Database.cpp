@@ -1,6 +1,6 @@
 #include "Database.h"
 
-Database::Database() {
+Database::Database() : QObject() {
     QProcess p;
     static QString command = "sqlite3 db.sqlite < sql.sql; sqlite3 db.sqlite";
 
@@ -27,15 +27,58 @@ Database::Database() {
         exit(1);
     }
 
-    // Sample query.
-    QSqlQuery q(this->db);
-    q.exec("SELECT * FROM Events;");
-    while (q.next()) {
-        qDebug() << "row" << q.at();
-        for (int i = 0; i < 5; i++) {
-            qDebug() << q.value(i);
+    filteredEvents = new QVector<Event*>();
+}
+
+void Database::loadEvents(int start, int stop) {
+    QSqlQuery query("SELECT time_, input_type, event_type, widget, details FROM Events WHERE time_ >= ? AND time_ <= ?");
+
+    query.addBindValue(start);
+    query.addBindValue(stop);
+
+    if (query.exec()) {
+        filteredEvents->clear();
+
+        while (query.next()) {
+            int time = query.value(0).toInt();
+            QString inputType = query.value(1).toString();
+            QString eventType = query.value(2).toString();
+            QString widget = query.value(3).toString();
+            QString details = query.value(4).toString();
+            Event *event = new Event(time, inputType, eventType, widget, details);
+            filteredEvents->append(event);
         }
+
+        emit eventsLoaded(filteredEvents);
     }
+    else
+        qDebug() << "Failed to execute query: " << query.lastError().text();
+}
+
+int Database::getMinEventTime() {
+    QSqlQuery query("SELECT MIN(time_) FROM Events;");
+
+    if (query.exec()) {
+        if(query.next())
+            return query.value(0).toInt();
+    }
+    else
+        qDebug() << "Failed to execute query: " << query.lastError().text();
+
+    return 0;
+}
+
+int Database::getMaxEventTime() {
+    QSqlQuery query("SELECT MAX(time_) FROM Events;");
+
+    if (query.exec()) {
+        if(query.next())
+            return query.value(0).toInt();
+    }
+    else
+        qDebug() << "Failed to execute query: " << query.lastError().text();
+
+    return 0;
 }
 
 void Database::close() {
