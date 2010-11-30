@@ -4,6 +4,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     this->database = new Database();
     connect(this->database, SIGNAL(eventsLoaded(QVector<Event*> *)), SLOT(onEventsLoaded(QVector<Event*> *)));
 
+    setGeometry(30, 30, 800, 600);
     createContent();
 }
 
@@ -20,7 +21,10 @@ void MainWindow::createContent() {
     this->timeLineVis = new TimeLineVisualization(this->database);
     connect(this->timeLineVis, SIGNAL(timeSpanChanged(int, int)), this->database, SLOT(loadEvents(int, int)));
 
-    mainLayout->addWidget(timeLineVis, 0, 0);
+    //this->heatMapVis = new HeatMapVisualization(this->database);
+
+    //mainLayout->addWidget(this->heatMapVis, 0, 0);
+    mainLayout->addWidget(this->timeLineVis, 1, 0);
 
     QWidget* centralWidget = new QWidget(this);
     centralWidget->setLayout(mainLayout);
@@ -35,5 +39,6 @@ void MainWindow::onEventsLoaded(QVector<Event*> *events) {
                  << events->at(i)->getWidget() << " "
                  << events->at(i)->getDetails();
     }
+    //this->heatMapVis->update(events);
 }
 

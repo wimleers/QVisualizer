@@ -6,6 +6,7 @@
 
 #include <QMainWindow>
 #include <QGridLayout>
+#include <QLabel>
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
