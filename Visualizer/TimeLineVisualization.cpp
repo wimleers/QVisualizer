@@ -1,11 +1,19 @@
 #include "TimeLineVisualization.h"
 
 TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
-   this->timeSlider = new QxtSpanSlider(Qt::Horizontal);
-   int minEventTime = database->getMinEventTime();
-   int maxEventTime = database->getMaxEventTime();
-   qDebug() << minEventTime << " " << maxEventTime;
-   this->timeSlider->setSpan(minEventTime, maxEventTime);
+   this->timeSlider = new MySpanSlider(Qt::Horizontal);
+   this->timeSlider->setSpan(database->getMinEventTime(), database->getMaxEventTime());
+
+   /*
+   QGraphicsScene scene;
+   QGraphicsProxyWidget *proxy = scene.addWidget(this->timeSlider);
+   qDebug() << "Is visible?" << proxy->isVisible();
+   qDebug() << "Position" << proxy->pos().x() << proxy->pos().y();
+   proxy->setPos();
+
+   QGraphicsView view(&scene);
+   view.show();
+   */
 
    this->timer = new QTimer();
    this->timer->setSingleShot(true);

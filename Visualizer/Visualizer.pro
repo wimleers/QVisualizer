@@ -14,7 +14,8 @@ QMAKE_CXXFLAGS += -O2
 HEADERS += MainWindow.h \
            Database.h \
            TimeLineVisualization.h \
-    Event.h
+    Event.h \
+    MySpanSlider.h
 
 SOURCES += MainWindow.cpp \
            Database.cpp \
