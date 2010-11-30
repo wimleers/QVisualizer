@@ -81,7 +81,5 @@ int Database::getMaxEventTime() {
 }
 
 void Database::close() {
-    if (this->db.isOpen())
-        this->db.close();
-//    this->db.removeDatabase();
+    this->db = QSqlDatabase();
 }
