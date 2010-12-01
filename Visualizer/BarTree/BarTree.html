@@ -1,0 +1,72 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+    <head>
+        <meta charset="utf-8">
+        <title>BarTree v0.0.0.1</title>
+        <script src="raphael.js"></script> 
+        <style type="text/css">
+          #holder {
+            border: 1px solid black;
+          }
+        </style>
+        <script type="text/javascript">
+            window.onload = function () {
+                var paper = Raphael("holder", 1000, 1000);
+                var spacing = 30;
+                var width = 1000;
+                var columns = 3;
+                var barWidth = width / columns - (columns + 1) * spacing;
+                
+                var fontAttributes = {
+                  'font-size'   : 45,
+                  'font-weigh'  : 800,
+                  'fill'        : '#ddd',
+                  'stroke'      : '#4A5054',
+                  'stoke-widht' : 1
+                };
+ 
+                function rectAttributes(color) {
+                  return {
+                    'fill'   : color,
+                    'stroke' : color
+                  };
+                };
+                
+                var mouseColor = '#1F1AB2';
+                var keyboardColor = '#FFC200';
+
+                var r1 = paper.rect(spacing, spacing, barWidth, 800);
+                r1.attr(rectAttributes(mouseColor));
+                var t1 = paper.text(spacing + r1.getBBox().width / 2, spacing + r1.getBBox().height /2 , "mouse");
+                t1.attr(fontAttributes);
+                var r2 = paper.rect(spacing, spacing + 800 + spacing, barWidth, 1000 - spacing - 800 - spacing - spacing);
+                r2.attr(rectAttributes(keyboardColor));
+                var t2 = paper.text(spacing + r2.getBBox().width / 2, spacing + 800 + spacing +  + r2.getBBox().height /2 , "keyboard");
+                t2.attr(fontAttributes);
+
+
+                var rr1 = paper.rect(spacing + barWidth + spacing, spacing, barWidth, 100);
+                rr1.attr(rectAttributes(mouseColor));
+                var rr2 = paper.rect(spacing + barWidth + spacing, spacing + 100 + spacing, barWidth, 50);
+                rr2.attr(rectAttributes(mouseColor));
+                
+                function connector(leftTopX, leftTopY, rightTopX, rightTopY, height, params) {
+                  return paper.path([
+                    "M", leftTopX, leftTopY,
+                    "L", rightTopX, rightTopY,
+                    "v", height,
+                    "L", leftTopX, leftTopY + height,
+                    "z"
+                  ]).attr(params);
+                }
+                var blehParams = {fill: '#1F1AB2', stroke: '#1F1AB2'};
+                var l1 = connector(spacing + barWidth, spacing, spacing + barWidth + spacing, spacing, 100, blehParams);
+                l1.toFront();
+                var l2 = connector(spacing + barWidth, spacing+101, spacing + barWidth + spacing, spacing+100+spacing, 50, blehParams);
+            };
+        </script> 
+    </head> 
+    <body> 
+        <div id="holder"></div> 
+    </body> 
+</html>
