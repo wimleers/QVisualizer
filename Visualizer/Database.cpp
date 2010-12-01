@@ -29,6 +29,10 @@ Database::Database() : QObject() {
     filteredEvents = new QVector<Event*>();
 }
 
+/* This method fetches all events having a timestamp from value 'start' up to 'stop'.
+   All such events are stored in a container of the type 'QVector<Event *>*' which is offered to
+   all present visualization widgets by passing the mentioned container via emitting the 'eventsLoaded'-signal.
+*/
 void Database::loadEvents(int start, int stop) {
     QSqlQuery query("SELECT time_, input_type, event_type, widget, details FROM Events WHERE time_ >= ? AND time_ <= ?");
 
@@ -54,6 +58,10 @@ void Database::loadEvents(int start, int stop) {
         qDebug() << "Failed to execute query: " << query.lastError().text();
 }
 
+/* This method fetches the lowest timestamp that is stored in the database.
+   The fetched value will be used to set a lower limit to the sliders that are part of the
+   TimeLineVisualization instance.
+*/
 int Database::getMinEventTime() {
     QSqlQuery query("SELECT MIN(time_) FROM Events;");
 
@@ -67,6 +75,10 @@ int Database::getMinEventTime() {
     return 0;
 }
 
+/* This method fetches the highest timestamp that is stored in the database.
+   The fetched value will be used to set an upper limit to the sliders that are part of the
+   TimeLineVisualization instance.
+*/
 int Database::getMaxEventTime() {
     QSqlQuery query("SELECT MAX(time_) FROM Events;");
 
@@ -81,5 +93,8 @@ int Database::getMaxEventTime() {
 }
 
 void Database::close() {
+    /*  In one way or another, the following line avoids the obscure error
+        'QSqlDatabasePrivate::removeDatabase: connection 'qt_sql_default_connection' is still
+        in use, all queries will cease to work.'. */
     this->db = QSqlDatabase();
 }

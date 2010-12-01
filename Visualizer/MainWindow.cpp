@@ -15,8 +15,16 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     this->close();
 }
 
+/* The general layout of the application is as follows:
+   ---------
+   | 1 | 2 |        1 = Inneke's heatmap
+   ----+ 2 |        2 = Wim's input ratio vis.
+   | 3 | 2 |        3 = Nick's interactive time line
+   ---------
+*/
 void MainWindow::createContent() {
-    mainLayout = new QGridLayout();
+    mainLayout = new QGridLayout(); // Given the ascii drawing in the comment above,
+                                    // this might be swapped with a hbox + vbox.
 
     this->timeLineVis = new TimeLineVisualization(this->database);
     connect(this->timeLineVis, SIGNAL(timeSpanChanged(int, int)), this->database, SLOT(loadEvents(int, int)));
@@ -31,6 +39,10 @@ void MainWindow::createContent() {
     this->setCentralWidget(centralWidget);
 }
 
+/* After the database had fetched the valid events, given a time frame, it passes those events
+   to this method, using a container of the type 'QVector<Event*>*'. All visualizations / widgets
+   that are outputting information, should invoke e.g. their update()-method here..
+*/
 void MainWindow::onEventsLoaded(QVector<Event*> *events) {
     for (int i = 0; i < events->count(); ++i) {
         qDebug() << events->at(i)->getTime() << " "
