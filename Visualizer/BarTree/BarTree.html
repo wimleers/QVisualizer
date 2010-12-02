@@ -21,13 +21,12 @@
             // Hardcoded settings.
             self.spacing = 20;
             self.levelSpacing = 100;
-            self.mouseColor = '#1F1AB2';
-            self.keyboardColor = '#FFC200';            
+            self.colors = ['#1F1AB2', '#00675C', '#FF3900', '#FFC200'];
             self.fontAttributes = {
               'font-size'   : 32,
-              'font-weigh'  : 800,
-              'fill'        : '#ddd',
-              'stroke'      : '#4A5054',
+              'font-weight' : 800,
+              'fill'        : '#EEE',
+              'stroke'      : '#333',
               'stoke-widht' : 1
             };            
 
@@ -99,7 +98,7 @@
                   currentBlock.yOffset = yOffset;
                   currentBlock.yConnectedMax = 0;
                   currentBlock.drawn = self.paper.rect(xOffset, yOffset, self.barWidth, barHeight)
-                                                 .attr(self.rectAttributes(self.mouseColor));
+                                                 .attr(self.rectAttributes(currentBlock.color));
                   currentBlock.drawnLabel = self.paper.text(xOffset + self.barWidth / 2, yOffset + barHeight / 2, currentBlock.label)
                                                       .attr(self.fontAttributes);
 
@@ -110,7 +109,7 @@
                     var parentBlockX = parentBlock.xOffset + self.barWidth;
                     var parentBlockY = parentBlock.yOffset + parentBlock.yConnectedMax;
                     parentBlock.yConnectedMax += barHeight;
-                    self.drawConnector(parentBlockX, parentBlockY, xOffset, yOffset, barHeight, self.rectAttributes(self.mouseColor));
+                    self.drawConnector(parentBlockX, parentBlockY, xOffset, yOffset, barHeight, self.rectAttributes(currentBlock.color));
                   }
 
                   // Increase yOffset for the next block.
@@ -149,11 +148,23 @@
                 delete subTree[label].parentFrequency;
                 var finalFrequency = parentFrequency * frequency;
                 frequencySumCheck += finalFrequency;
+
+                // If this is the first level, automatically assign the next
+                // unused color from the color pool. In subsequent levels,
+                // automatically inherit the parent level's color.
+                if (subTree[label].parentColor === undefined) {
+                  color = self.colors[level.blocks.length];
+                }
+                else {
+                  color = subTree[label].parentColor;
+                }
+
                 block = {
                   'label'          : label,
                   'frequency'      : frequency,
                   'parentFrequency': parentFrequency,
                   'finalFrequency' : finalFrequency,
+                  'color'          : color,
                 };
                 if (subTree[label].parentBlock !== undefined) {
                   block.parentBlock =  subTree[label].parentBlock;
@@ -168,6 +179,7 @@
                       nextSubTree[child] = subTree[label].children[child];
                       nextSubTree[child].parentBlock = block; // MIH
                       nextSubTree[child].parentFrequency = finalFrequency;
+                      nextSubTree[child].parentColor = color;
                     }
                     // Automatically merge blocks in deeper levels that have
                     // the same label!
