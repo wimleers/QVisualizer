@@ -68,7 +68,7 @@
 
               // Draw!
               var xOffset = self.spacing;
-              for (var l = 0; l < self.levels.length -1; l++) {
+              for (var l = 0; l < self.levels.length; l++) {
                 var numBlocks = self.levels[l].blocks.length;
 
                 // Calculate the vertical spacing based on the availableHeight
@@ -126,85 +126,93 @@
                 }
 
                 return true;
-            }
+            };
 
-            // parses hierarchical data structure into simple array of levels,
-            // with blocks in each level
             self.parseData = function(subTree, levels) {
-              var frequencySumCheck = 0.0;
-// console.log('new level');
+              var isRootLevel = false;
+              var currentLevel = {};
+              currentLevel.blocks = [];
+              var nextSubTree = {};
+
+              // Detect whether this is the root level.
               if (levels === undefined) {
                 levels = [];
+                isRootLevel = true;
               }
 
-              
-              nextSubTree = {};
-
-              level = {};
-              level.blocks = [];
+              // Iterate over all labels in the given subtree, creating a
+              // block for each label.
               for (label in subTree) {
-                var frequency = subTree[label].frequency;
-                var parentFrequency = (subTree[label].parentFrequency === undefined) ? 1.0 : subTree[label].parentFrequency;
-                delete subTree[label].parentFrequency;
-                var finalFrequency = parentFrequency * frequency;
-                frequencySumCheck += finalFrequency;
-
-                // If this is the first level, automatically assign the next
-                // unused color from the color pool. In subsequent levels,
-                // automatically inherit the parent level's color.
-                if (subTree[label].parentColor === undefined) {
-                  color = self.colors[level.blocks.length];
+                // If this is the root level:
+                // - use the block's frequency level as the final frequency.
+                //   In subsequent levels, use the finalFrequency property.
+                // - automatically assign the next unused color from the color
+                //   pool. In subsequent levels, automatically inherit the
+                //   parent level's color.
+                if (isRootLevel) {
+                  var finalFrequency = subTree[label].frequency;
+                  var color          = self.colors[currentLevel.blocks.length];
+                  var parentBlock    = undefined;
                 }
                 else {
-                  color = subTree[label].parentColor;
+                  var finalFrequency = subTree[label].finalFrequency;
+                  var color          = subTree[label].parentColor;
+                  var parentBlock    = subTree[label].parentBlock;
                 }
 
+                // Generate the block object and push it into the current
+                // level's array of blocks.
                 block = {
                   'label'          : label,
-                  'frequency'      : frequency,
-                  'parentFrequency': parentFrequency,
                   'finalFrequency' : finalFrequency,
                   'color'          : color,
+                  'parentBlock'    : parentBlock
                 };
-                if (subTree[label].parentBlock !== undefined) {
-                  block.parentBlock =  subTree[label].parentBlock;
-                }
-                level.blocks.push(block);
+                currentLevel.blocks.push(block);
 
-// console.log(label);
-// console.log(finalFrequency);
+                // If this block has children, then store them for the next
+                // recursive call, in the nextSubTree variable.
                 if (subTree[label].children !== undefined) {
                   for (child in subTree[label].children) {
+                    // Final frequency of child block = final frequency of
+                    // current block times frequency of frequency of child
+                    // block.
+                    var finalFrequencyOfChildBlock = finalFrequency * subTree[label].children[child].frequency;
+
+                    // If this child does not yet exist in nextSubTree, create
+                    // it.
                     if (nextSubTree[child] == undefined) {
-                      nextSubTree[child] = subTree[label].children[child];
-                      nextSubTree[child].parentBlock = block; // MIH
-                      nextSubTree[child].parentFrequency = finalFrequency;
-                      nextSubTree[child].parentColor = color;
+                      nextSubTree[child] = {};
+                      nextSubTree[child].finalFrequency = finalFrequencyOfChildBlock;
+                      nextSubTree[child].parentBlock    = block;
+                      nextSubTree[child].parentColor    = color;
+                      if (subTree[label].children[child].children !== undefined) {
+                        nextSubTree[child].children = subTree[label].children[child].children;
+                      }
                     }
-                    // Automatically merge blocks in deeper levels that have
-                    // the same label!
+                    // If this child already exists in nextSubTree, update its
+                    // final frequency.
                     else {
-// console.log("YARRRRRR");
-// console.log(subTree[label].children[child]);
-                      nextSubTree[child].frequency += subTree[label].children[child].frequency;
-                      nextSubTree[child].parentFrequency += finalFrequency;                      
+                      nextSubTree[child].finalFrequency += finalFrequencyOfChildBlock;
                     }
                   }
                 }
               }
-// console.log('frequency sum check:');
-// console.log(frequencySumCheck);
 
-              if (level.blocks.length > 0)
-                levels.push(level);
-// console.log('\t\tnext subtree:');
-// console.log(nextSubTree);
-              // console.log(self.isEmpty(nextSubTree));
+              // If any blocks were generated for the current level, push them
+              // onto the the levels array.
+              if (currentLevel.blocks.length > 0) {
+                levels.push(currentLevel);
+              }
 
-              if (!self.isEmpty(nextSubTree))
+              // If the next sub tree is not empty, the make a recursive call.
+              // Otherwise, return the levels array, because we're done.
+              if (!self.isEmpty(nextSubTree)) {
                 return self.parseData(nextSubTree, levels);
-              else
+              }
+              else {
                 return levels;
+              }
             };
 
             self.rectAttributes = function(color, opacity) {
@@ -228,7 +236,7 @@
                 "L", leftTopX, leftTopY + height,
                 "z"
               ]).attr(params);
-            }
+            };
 
             self.init();
           };
