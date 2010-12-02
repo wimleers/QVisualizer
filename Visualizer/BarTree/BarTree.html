@@ -2,7 +2,7 @@
 <html lang="en"> 
     <head>
         <meta charset="utf-8">
-        <title>BarTree v0.01</title>
+        <title>BarTree v0.1</title>
         <script src="raphael.js"></script>
         <script src="jquery-1.4.4.js"></script>
         <style type="text/css">
@@ -21,13 +21,13 @@
             // Hardcoded settings.
             self.spacing = 20;
             self.levelSpacing = 100;
-            self.colors = ['#1F1AB2', '#00675C', '#FF3900', '#FFC200'];
+            self.colors = ['#428496', '#505DF2', '#1F1AB2', '#00675C', '#FF3900', '#FFC200'];
             self.fontAttributes = {
               'font-size'   : 32,
               'font-weight' : 800,
               'fill'        : '#EEE',
-              'stroke'      : '#333',
-              'stoke-widht' : 1
+              'stroke'      : '#000',
+              'stoke-widht' : 3
             };            
 
             self.init = function() {
@@ -96,20 +96,28 @@
                   // label.
                   currentBlock.xOffset = xOffset;
                   currentBlock.yOffset = yOffset;
-                  currentBlock.yConnectedMax = 0;
+                  currentBlock.yRightConnectedMax = 0;
+                  currentBlock.yLeftConnectedMax = 0;
                   currentBlock.drawn = self.paper.rect(xOffset, yOffset, self.barWidth, barHeight)
                                                  .attr(self.rectAttributes(currentBlock.color));
                   currentBlock.drawnLabel = self.paper.text(xOffset + self.barWidth / 2, yOffset + barHeight / 2, currentBlock.label)
                                                       .attr(self.fontAttributes);
 
-                  // Draw connection between this block and its parent block
+                  // Draw connection between this block and its parent blocks
                   // in the previous (higher) level.
                   if (l > 0) {
-                    var parentBlock = currentBlock.parentBlock;
-                    var parentBlockX = parentBlock.xOffset + self.barWidth;
-                    var parentBlockY = parentBlock.yOffset + parentBlock.yConnectedMax;
-                    parentBlock.yConnectedMax += barHeight;
-                    self.drawConnector(parentBlockX, parentBlockY, xOffset, yOffset, barHeight, self.rectAttributes(currentBlock.color));
+                    for (var i = 0; i < currentBlock.parentBlocks.length; i++) {
+                      var parentBlock = currentBlock.parentBlocks[i];
+                      var parentBlockX = parentBlock.block.xOffset + self.barWidth;
+                      var parentBlockY = parentBlock.block.yOffset + parentBlock.block.yRightConnectedMax;
+                      var currentBlockX = xOffset;
+                      var currentBlockY = yOffset + currentBlock.yLeftConnectedMax;
+
+                      var cHeight = parentBlock.frequency * parentBlock.block.drawn.getBBox().height;
+                      parentBlock.block.yRightConnectedMax += cHeight;
+                      currentBlock.yLeftConnectedMax += cHeight;
+                      self.drawConnector(parentBlockX, parentBlockY, currentBlockX, currentBlockY, cHeight, self.rectAttributes(currentBlock.color));
+                    }
                   }
 
                   // Increase yOffset for the next block.
@@ -149,24 +157,27 @@
                 // - automatically assign the next unused color from the color
                 //   pool. In subsequent levels, automatically inherit the
                 //   parent level's color.
+                // - PARENTBLOCKS
                 if (isRootLevel) {
                   var finalFrequency = subTree[label].frequency;
                   var color          = self.colors[currentLevel.blocks.length];
-                  var parentBlock    = undefined;
+                  var parentBlocks   = undefined;
                 }
                 else {
                   var finalFrequency = subTree[label].finalFrequency;
                   var color          = subTree[label].parentColor;
-                  var parentBlock    = subTree[label].parentBlock;
+                  var parentBlocks   = subTree[label].parentBlocks;
                 }
+                var frequency = subTree[label].frequency;
 
                 // Generate the block object and push it into the current
                 // level's array of blocks.
                 block = {
                   'label'          : label,
+                  'frequency'      : frequency,
                   'finalFrequency' : finalFrequency,
                   'color'          : color,
-                  'parentBlock'    : parentBlock
+                  'parentBlocks'   : parentBlocks
                 };
                 currentLevel.blocks.push(block);
 
@@ -177,23 +188,35 @@
                     // Final frequency of child block = final frequency of
                     // current block times frequency of frequency of child
                     // block.
-                    var finalFrequencyOfChildBlock = finalFrequency * subTree[label].children[child].frequency;
+                    var frequencyOfChildBlock      = subTree[label].children[child].frequency;
+                    var finalFrequencyOfChildBlock = finalFrequency * frequencyOfChildBlock;
 
                     // If this child does not yet exist in nextSubTree, create
                     // it.
                     if (nextSubTree[child] == undefined) {
                       nextSubTree[child] = {};
+                      nextSubTree[child].frequency      = frequencyOfChildBlock;
                       nextSubTree[child].finalFrequency = finalFrequencyOfChildBlock;
-                      nextSubTree[child].parentBlock    = block;
+                      var parentBlock = {
+                        'frequency' : frequencyOfChildBlock,
+                        'block'     : block
+                      };
+                      nextSubTree[child].parentBlocks   = [ parentBlock ];
                       nextSubTree[child].parentColor    = color;
                       if (subTree[label].children[child].children !== undefined) {
                         nextSubTree[child].children = subTree[label].children[child].children;
                       }
                     }
                     // If this child already exists in nextSubTree, update its
-                    // final frequency.
+                    // final frequency and add the current block to its parent
+                    // blocks.
                     else {
                       nextSubTree[child].finalFrequency += finalFrequencyOfChildBlock;
+                      var parentBlock = {
+                        'frequency' : frequencyOfChildBlock,
+                        'block'     : block
+                      };
+                      nextSubTree[child].parentBlocks.push(parentBlock);
                     }
                   }
                 }
@@ -282,15 +305,15 @@
                 'release' : {
                   'frequency' : 0.8,
                   'children' : {
-                    'P'      : { 'frequency' : 0.4 },
-                    'CTRL+Z' : { 'frequency' : 0.4 },
-                    'other'  : { 'frequency' : 0.2 }
+                    'P'        : { 'frequency' : 0.4 },
+                    'CTRL+Z'   : { 'frequency' : 0.4 },
+                    ' other '  : { 'frequency' : 0.2 }
                   }
                 },
                 'press' : {
                   'frequency' : 0.2,
                   'children'  : {
-                    'other' : { 'frequency' : 1.0 }
+                    ' other ' : { 'frequency' : 1.0 }
                   }
                 }
               }
