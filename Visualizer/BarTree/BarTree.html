@@ -24,7 +24,7 @@
             self.mouseColor = '#1F1AB2';
             self.keyboardColor = '#FFC200';            
             self.fontAttributes = {
-              'font-size'   : 45,
+              'font-size'   : 35,
               'font-weigh'  : 800,
               'fill'        : '#ddd',
               'stroke'      : '#4A5054',
@@ -86,21 +86,27 @@
 
                 var yOffset = verticalSpacing;
                 for (var b = 0; b < numBlocks; b++) {
-                  var finalFrequency = self.levels[l].blocks[b].finalFrequency;
+                  var currentBlock = self.levels[l].blocks[b];
+                  
+                  var finalFrequency = currentBlock.finalFrequency;
                   var barHeight = finalFrequency * availableHeight;
                   console.log('level' + l +', block ' + b + ': ' + barHeight);
                   
                   // Draw block, and store where it was drawn as well as a
-                  // reference to the drawn block.
-                  self.levels[l].blocks[b].xOffset = xOffset;
-                  self.levels[l].blocks[b].yOffset = yOffset;
-                  self.levels[l].blocks[b].yConnectedMax = 0;
-                  self.levels[l].blocks[b].drawn = self.paper.rect(xOffset, yOffset, self.barWidth, barHeight).attr(self.rectAttributes(self.mouseColor));
+                  // reference to the drawn block. Analogously for the block
+                  // label.
+                  currentBlock.xOffset = xOffset;
+                  currentBlock.yOffset = yOffset;
+                  currentBlock.yConnectedMax = 0;
+                  currentBlock.drawn = self.paper.rect(xOffset, yOffset, self.barWidth, barHeight)
+                                                 .attr(self.rectAttributes(self.mouseColor));
+                  currentBlock.drawnLabel = self.paper.text(xOffset + self.barWidth / 2, yOffset + barHeight / 2, currentBlock.label)
+                                                      .attr(self.fontAttributes);
 
                   // Draw connection between this block and its parent block
                   // in the previous (higher) level.
                   if (l > 0) {
-                    var parentBlock = self.levels[l].blocks[b].parentBlock;
+                    var parentBlock = currentBlock.parentBlock;
                     var parentBlockX = parentBlock.xOffset + self.barWidth;
                     var parentBlockY = parentBlock.yOffset + parentBlock.yConnectedMax;
                     parentBlock.yConnectedMax += barHeight;
@@ -254,7 +260,7 @@
               'frequency' : 0.2,
               'children' : {
                 'release' : {
-                  'frequency' : 0.9,
+                  'frequency' : 0.8,
                   'children' : {
                     'P'      : { 'frequency' : 0.4 },
                     'CTRL+Z' : { 'frequency' : 0.4 },
@@ -262,7 +268,7 @@
                   }
                 },
                 'press' : {
-                  'frequency' : 0.1,
+                  'frequency' : 0.2,
                   'children'  : {
                     'other' : { 'frequency' : 1.0 }
                   }
