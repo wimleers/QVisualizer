@@ -50,82 +50,7 @@
                               )
                                / self.levels.length;                           // divided by the number of levels = width of each bar.
 
-              // Determine the "busiest" level, i.e. the one with the most
-              // blocks. We will assign this level the minimum amount of
-              // vertical spacing. Based on the availableHeight variable (
-              // which is the height available for drawing blocks) in that
-              // level, we will dynamically increase the vertical spacing in
-              // less busy levels.
-              var busiestLevel = 0;
-              var busiestLevelNumBlocks = 0;
-              for (var l = 0; l < self.levels.length; l++) {
-                var numBlocks = self.levels[l].blocks.length;
-                if (numBlocks > busiestLevelNumBlocks) {
-                  busiestLevel = l;
-                  busiestLevelNumBlocks = numBlocks;
-                }
-              }
-              var numBlocksInBusiestLevel = self.levels[busiestLevel].blocks.length;
-              var availableHeight = self.height - (numBlocksInBusiestLevel + 1) * self.spacing;
-
-              // Draw!
-              var xOffset = self.spacing;
-              for (var l = 0; l < self.levels.length; l++) {
-                var numBlocks = self.levels[l].blocks.length;
-
-                // Calculate the vertical spacing based on the availableHeight
-                // for the busiest level.
-                var numSpacings = numBlocks + 1;
-                var levelAvailableHeight = self.height - (numSpacings * self.spacing);
-                var additionalSpacingHeight = levelAvailableHeight - availableHeight;
-                var verticalSpacing = ((numSpacings * self.spacing) + additionalSpacingHeight) / numSpacings;
-
-                // Increase xOffset for nested levels.
-                if (l > 0) {
-                  xOffset += self.barWidth + self.levelSpacing;
-                }
-
-                var yOffset = verticalSpacing;
-                for (var b = 0; b < numBlocks; b++) {
-                  var currentBlock = self.levels[l].blocks[b];
-                  
-                  var finalFrequency = currentBlock.finalFrequency;
-                  var barHeight = finalFrequency * availableHeight;
-                  console.log('level' + l +', block ' + b + ': ' + barHeight);
-                  
-                  // Draw block, and store where it was drawn as well as a
-                  // reference to the drawn block. Analogously for the block
-                  // label.
-                  currentBlock.xOffset = xOffset;
-                  currentBlock.yOffset = yOffset;
-                  currentBlock.yRightConnectedMax = 0;
-                  currentBlock.yLeftConnectedMax = 0;
-                  currentBlock.drawn = self.paper.rect(xOffset, yOffset, self.barWidth, barHeight)
-                                                 .attr(self.rectAttributes(currentBlock.color));
-                  currentBlock.drawnLabel = self.paper.text(xOffset + self.barWidth / 2, yOffset + barHeight / 2, currentBlock.label)
-                                                      .attr(self.fontAttributes);
-
-                  // Draw connection between this block and its parent blocks
-                  // in the previous (higher) level.
-                  if (l > 0) {
-                    for (var i = 0; i < currentBlock.parentBlocks.length; i++) {
-                      var parentBlock = currentBlock.parentBlocks[i];
-                      var parentBlockX = parentBlock.block.xOffset + self.barWidth;
-                      var parentBlockY = parentBlock.block.yOffset + parentBlock.block.yRightConnectedMax;
-                      var currentBlockX = xOffset;
-                      var currentBlockY = yOffset + currentBlock.yLeftConnectedMax;
-
-                      var cHeight = parentBlock.frequency * parentBlock.block.drawn.getBBox().height;
-                      parentBlock.block.yRightConnectedMax += cHeight;
-                      currentBlock.yLeftConnectedMax += cHeight;
-                      self.drawConnector(parentBlockX, parentBlockY, currentBlockX, currentBlockY, cHeight, self.rectAttributes(currentBlock.color));
-                    }
-                  }
-
-                  // Increase yOffset for the next block.
-                  yOffset += barHeight + verticalSpacing;
-                }
-              }              
+              self.draw();
             };
 
             // Source: http://stackoverflow.com/questions/679915/how-do-i-test-for-an-empty-javascript-object-from-json.
@@ -240,7 +165,7 @@
               }
             };
 
-            self.rectAttributes = function(color, opacity) {
+            self.blockAttributes = function(color, opacity) {
               if (opacity === undefined) {
                 var opacity = 0.8;
               }
@@ -252,6 +177,84 @@
                 'stroke-opacity' : opacity
               };
             };
+
+            self.draw = function() {
+              // Determine the "busiest" level, i.e. the one with the most
+              // blocks. We will assign this level the minimum amount of
+              // vertical spacing. Based on the availableHeight variable (
+              // which is the height available for drawing blocks) in that
+              // level, we will dynamically increase the vertical spacing in
+              // less busy levels.
+              var busiestLevel = 0;
+              var busiestLevelNumBlocks = 0;
+              for (var l = 0; l < self.levels.length; l++) {
+                var numBlocks = self.levels[l].blocks.length;
+                if (numBlocks > busiestLevelNumBlocks) {
+                  busiestLevel = l;
+                  busiestLevelNumBlocks = numBlocks;
+                }
+              }
+              var numBlocksInBusiestLevel = self.levels[busiestLevel].blocks.length;
+              var availableHeight = self.height - (numBlocksInBusiestLevel + 1) * self.spacing;
+
+              // Draw!
+              var xOffset = self.spacing;
+              for (var l = 0; l < self.levels.length; l++) {
+                var numBlocks = self.levels[l].blocks.length;
+
+                // Calculate the vertical spacing based on the availableHeight
+                // for the busiest level.
+                var numSpacings = numBlocks + 1;
+                var levelAvailableHeight = self.height - (numSpacings * self.spacing);
+                var additionalSpacingHeight = levelAvailableHeight - availableHeight;
+                var verticalSpacing = ((numSpacings * self.spacing) + additionalSpacingHeight) / numSpacings;
+
+                // Increase xOffset for nested levels.
+                if (l > 0) {
+                  xOffset += self.barWidth + self.levelSpacing;
+                }
+
+                var yOffset = verticalSpacing;
+                for (var b = 0; b < numBlocks; b++) {
+                  var currentBlock = self.levels[l].blocks[b];
+
+                  var finalFrequency = currentBlock.finalFrequency;
+                  var barHeight = finalFrequency * availableHeight;
+
+                  // Draw block, and store where it was drawn as well as a
+                  // reference to the drawn block. Analogously for the block
+                  // label.
+                  currentBlock.xOffset = xOffset;
+                  currentBlock.yOffset = yOffset;
+                  currentBlock.yRightConnectedMax = 0;
+                  currentBlock.yLeftConnectedMax = 0;
+                  currentBlock.drawn = self.paper.rect(xOffset, yOffset, self.barWidth, barHeight)
+                                                 .attr(self.blockAttributes(currentBlock.color));
+                  currentBlock.drawnLabel = self.paper.text(xOffset + self.barWidth / 2, yOffset + barHeight / 2, currentBlock.label)
+                                                      .attr(self.fontAttributes);
+
+                  // Draw connection between this block and its parent blocks
+                  // in the previous (higher) level.
+                  if (l > 0) {
+                    for (var i = 0; i < currentBlock.parentBlocks.length; i++) {
+                      var parentBlock = currentBlock.parentBlocks[i];
+                      var parentBlockX = parentBlock.block.xOffset + self.barWidth;
+                      var parentBlockY = parentBlock.block.yOffset + parentBlock.block.yRightConnectedMax;
+                      var currentBlockX = xOffset;
+                      var currentBlockY = yOffset + currentBlock.yLeftConnectedMax;
+
+                      var cHeight = parentBlock.frequency * parentBlock.block.drawn.getBBox().height;
+                      parentBlock.block.yRightConnectedMax += cHeight;
+                      currentBlock.yLeftConnectedMax += cHeight;
+                      self.drawConnector(parentBlockX, parentBlockY, currentBlockX, currentBlockY, cHeight, self.blockAttributes(currentBlock.color));
+                    }
+                  }
+
+                  // Increase yOffset for the next block.
+                  yOffset += barHeight + verticalSpacing;
+                }
+              }
+            }
 
             self.drawConnector = function(leftTopX, leftTopY, rightTopX, rightTopY, height, params) {
               return self.paper.path([
