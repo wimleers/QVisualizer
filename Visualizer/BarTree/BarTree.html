@@ -3,21 +3,16 @@
     <head>
         <meta charset="utf-8">
         <title>BarTree v0.1</title>
-        <script src="raphael.js"></script>
-        <script src="jquery-1.4.4.js"></script>
         <style type="text/css">
-          #holder {
-            width: 500px;
-            height: 800px;
-            border: 1px solid black;
+          body {
+            margin: 0;
+            overflow: hidden;
           }
         </style>
+        <script src="raphael.js"></script>
+        <script src="jquery-1.4.4.js"></script>
         <script type="text/javascript">
-          function BarTreeView(domID, width, height, data) {
-            if (!(this instanceof arguments.callee)) {
-              return new arguments.callee(arguments);
-            }
-
+          function BarTreeView(domID, data, width, height) {
             var self = this;
 
             // Hardcoded settings.
@@ -33,15 +28,39 @@
             };            
 
             self.init = function() {
-              self.paper = new Raphael(domID, width, height);
+              self.paper = new Raphael(domID, 1, 1);
 
-              // Incoming settings.
-              self.width  = width;
-              self.height = height;
               self.data   = data;
 
               // Convert incoming hierarchical data into simple levels.
               self.levels = self.parseData(self.data);
+
+              // When no width and height have been defined, get the view
+              // port width and height instead, and resize the Raphaël paper
+              // upon window resizes.
+              if (width === undefined || height === undefined) {
+                width  = self.getViewportWidth();
+                height = self.getViewportHeight();
+                window.onresize = function () {
+                  self.resize(self.getViewportWidth(), self.getViewportHeight());
+                };
+              }
+
+              self.resize(width, height);
+              self.draw();
+            };
+
+            self.getViewportWidth = function() {
+              return document.body.clientWidth;
+            };
+
+            self.getViewportHeight = function() {
+              return document.documentElement.clientHeight;
+            };
+
+            self.resize = function(width, height) {
+              self.width  = width;
+              self.height = height;
 
               // Dynamically calculated settings.
               self.barWidth = (  self.width                                    // Entire width
@@ -50,6 +69,8 @@
                               )
                                / self.levels.length;                           // divided by the number of levels = width of each bar.
 
+              self.paper.clear();
+              self.paper.setSize(self.width, self.height);
               self.draw();
             };
 
@@ -254,7 +275,7 @@
                   yOffset += barHeight + verticalSpacing;
                 }
               }
-            }
+            };
 
             self.drawConnector = function(leftTopX, leftTopY, rightTopX, rightTopY, height, params) {
               return self.paper.path([
@@ -325,7 +346,7 @@
             }
           };
           $().ready(function() {
-            var vis3 = new BarTreeView("holder", $('#holder').width(), $('#holder').height(), data);
+            var vis3 = new BarTreeView("holder", data);
           });
         </script> 
     </head> 
