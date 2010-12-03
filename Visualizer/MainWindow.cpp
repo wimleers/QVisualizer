@@ -34,6 +34,9 @@ void MainWindow::createContent() {
     //mainLayout->addWidget(this->heatMapVis, 0, 0);
     mainLayout->addWidget(this->timeLineVis, 1, 0);
 
+    this->barTreeVis = new BarTreeVisualization();
+    mainLayout->addWidget(this->barTreeVis, 0, 1);
+
     QWidget* centralWidget = new QWidget(this);
     centralWidget->setLayout(mainLayout);
     this->setCentralWidget(centralWidget);

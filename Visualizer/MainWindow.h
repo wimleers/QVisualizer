@@ -3,6 +3,7 @@
 
 #include "Database.h"
 #include "TimeLineVisualization.h"
+#include "BarTreeVisualization.h"
 
 #include <QMainWindow>
 #include <QGridLayout>
@@ -15,11 +16,12 @@ class MainWindow : public QMainWindow {
         Database *database;
 
         TimeLineVisualization* timeLineVis;
+        BarTreeVisualization* barTreeVis;
         QGridLayout *mainLayout;
 
         void closeEvent(QCloseEvent *e);
         void createContent();
-    
+
     public:
         MainWindow(QWidget *parent = 0);
         ~MainWindow() {}
