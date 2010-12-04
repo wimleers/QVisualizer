@@ -57,7 +57,6 @@
               self.width  = width;
               self.height = height;
 
-              self.paper.clear();
               self.paper.setSize(self.width, self.height);
             };
 
@@ -187,6 +186,8 @@
             };
 
             self.draw = function() {
+              self.paper.clear();
+
               // Dynamically calculated settings.
               self.barWidth = (  self.width                                    // Entire width
                                - (2 * self.spacing)                            // minus the spacing at the edges
@@ -355,9 +356,10 @@
               'frequency' : 0.2,
             }
           };
+          var barTreeView;
           window.onload = function() {
-            var vis3 = new BarTreeView("holder");
-            vis3.loadData(data);
+            barTreeView = new BarTreeView("holder");
+            barTreeView.loadData(data);
           };
         </script> 
     </head> 
