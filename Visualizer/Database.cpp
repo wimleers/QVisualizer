@@ -3,17 +3,18 @@
 Database::Database() : QObject() {
     QProcess p;
 
-#ifdef Q_WS_WIN
-    p.start(QString("cmd.exe /c %1").arg("sqlite3 db.sqlite < sql.sql && sqlite3 db.sqlite"));
+    static QString command = "sqlite3 db.sqlite < sql.sql && sqlite3 db.sqlite";
+#ifdef Q_OS_WIN32
+    p.start(QString("cmd.exe /c %1").arg(command));
 #else
-    p.start(QString("sh -c \"%1\"").arg("sqlite3 db.sqlite < sql.sql; sqlite3 db.sqlite"));
+    p.start(QString("sh -c \"%1\"").arg(command));
 #endif
 
     if (p.waitForStarted(500)) {
-        p.write(".separator '|'\r\n");
+        p.write(".separator ','\r\n");
         p.write(".import events.csv Events\r\n");
         p.waitForFinished(1000);
-        qDebug() << p.readAllStandardOutput();
+        qDebug() << "Imported recorded events." << p.readAllStandardOutput();
     }
     else
        qDebug() << "Failed to import recorded events into SQLite database.";
