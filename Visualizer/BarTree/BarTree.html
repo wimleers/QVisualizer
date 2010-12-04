@@ -12,7 +12,7 @@
         <script src="raphael.js"></script>
         <script src="jquery-1.4.4.js"></script>
         <script type="text/javascript">
-          function BarTreeView(domID, data, width, height) {
+          function BarTreeView(domID, width, height) {
             var self = this;
 
             // Hardcoded settings.
@@ -30,24 +30,19 @@
             self.init = function() {
               self.paper = new Raphael(domID, 1, 1);
 
-              self.data   = data;
-
-              // Convert incoming hierarchical data into simple levels.
-              self.levels = self.parseData(self.data);
-
               // When no width and height have been defined, get the view
               // port width and height instead, and resize the Raphaël paper
               // upon window resizes.
               if (width === undefined || height === undefined) {
-                width  = self.getViewportWidth();
-                height = self.getViewportHeight();
+                self.width  = self.getViewportWidth();
+                self.height = self.getViewportHeight();
                 window.onresize = function () {
                   self.resize(self.getViewportWidth(), self.getViewportHeight());
+                  self.draw();
                 };
               }
 
-              self.resize(width, height);
-              self.draw();
+              self.resize(self.width, self.height);
             };
 
             self.getViewportWidth = function() {
@@ -62,16 +57,8 @@
               self.width  = width;
               self.height = height;
 
-              // Dynamically calculated settings.
-              self.barWidth = (  self.width                                    // Entire width
-                               - (2 * self.spacing)                            // minus the spacing at the edges
-                               - (self.levels.length - 1) * self.levelSpacing  // minus the spacing between the levels
-                              )
-                               / self.levels.length;                           // divided by the number of levels = width of each bar.
-
               self.paper.clear();
               self.paper.setSize(self.width, self.height);
-              self.draw();
             };
 
             // Source: http://stackoverflow.com/questions/679915/how-do-i-test-for-an-empty-javascript-object-from-json.
@@ -200,6 +187,13 @@
             };
 
             self.draw = function() {
+              // Dynamically calculated settings.
+              self.barWidth = (  self.width                                    // Entire width
+                               - (2 * self.spacing)                            // minus the spacing at the edges
+                               - (self.levels.length - 1) * self.levelSpacing  // minus the spacing between the levels
+                              )
+                               / self.levels.length;                           // divided by the number of levels = width of each bar.
+
               // Determine the "busiest" level, i.e. the one with the most
               // blocks. We will assign this level the minimum amount of
               // vertical spacing. Based on the availableHeight variable (
@@ -287,6 +281,14 @@
               ]).attr(params);
             };
 
+            self.loadData = function(data) {
+              self.data   = data;
+
+              self.levels = self.parseData(data);
+
+              self.draw();
+            };
+
             self.init();
           };
 
@@ -346,7 +348,8 @@
             }
           };
           $().ready(function() {
-            var vis3 = new BarTreeView("holder", data);
+            var vis3 = new BarTreeView("holder");
+            vis3.loadData(data);
           });
         </script> 
     </head> 
