@@ -10,7 +10,7 @@
           }
         </style>
         <script src="raphael.js"></script>
-        <script src="jquery-1.4.4.js"></script>
+        <!-- <script src="jquery-1.4.4.js"></script> -->
         <script type="text/javascript">
           function BarTreeView(domID, width, height) {
             var self = this;
@@ -347,10 +347,18 @@
               }
             }
           };
-          $().ready(function() {
+          var data2 = {
+            'mouse' : {
+              'frequency' : 0.6,
+            },
+            'keyboard' : {
+              'frequency' : 0.2,
+            }
+          };
+          window.onload = function() {
             var vis3 = new BarTreeView("holder");
             vis3.loadData(data);
-          });
+          };
         </script> 
     </head> 
     <body> 
