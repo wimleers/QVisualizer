@@ -26,7 +26,7 @@ class Database : public QObject {
 
     public:
         Database();
-        ~Database() {}
+        ~Database();
 
         int getMinEventTime();
         int getMaxEventTime();

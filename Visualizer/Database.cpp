@@ -27,7 +27,11 @@ Database::Database() : QObject() {
         exit(1);
     }
 
-    filteredEvents = new QVector<Event*>();
+    this->filteredEvents = new QVector<Event*>();
+}
+
+Database::~Database() {
+    delete this->filteredEvents;
 }
 
 /* This method fetches all events having a timestamp from value 'start' up to 'stop'.
