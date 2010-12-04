@@ -1,8 +1,190 @@
 #include "BarTreeVisualization.h"
 
 BarTreeVisualization::BarTreeVisualization(QWidget *parent) : QWebView(parent) {
-    this->load(QUrl("qrc:/BarTree/BarTree.html"));
-    this->show();
+    this->mainFrame = this->page()->mainFrame();
+    connect(this, SIGNAL(loadFinished(bool)), SLOT(loadHasFinished(bool)));
 
-    //this->page()->mainFrame()->evaluateJavaScript("alert('boohoo');");
+    // See explanation at BarTreeVisualization::timerEvent().
+    startTimer(BARTREEVISUALIZATION_DATA_REFRESH_INTERVAL);
+
+    // Load the visualization in the web view.
+    this->load(QUrl("qrc:/BarTree/BarTree.html"));
+}
+
+void BarTreeVisualization::loadHasFinished(bool ok) {
+    this->pageHasLoaded = ok;
+}
+
+void BarTreeVisualization::eventSequenceChanged(QVector<Event *> * events) {
+    this->mutex.lock();
+    this->nextEventSequence = events;
+    this->mutex.unlock();
+}
+
+/**
+ * Periodically (BARTREEVISUALIZATION_DATA_REFRESH_INTERVAL intervals) poll
+ * to see if there's a new event sequence tod raw. We do this using polling
+ * to prevent continuous redrawing. The number of redrawings per second is
+ * now effectively limited to 1/BARTREEVISUALIZATION_DATA_REFRESH_INTERVAL.
+ */
+void BarTreeVisualization::timerEvent(QTimerEvent *) {
+    // If the page hasn't been loaded yet, then definitely don't send an
+    // event sequence to the web view yet!
+    if (!this->pageHasLoaded)
+        return;
+
+    // Make the next event sequence the current, if any, and send it to the
+    // web view.
+    if (this->nextEventSequence != NULL) {
+        this->mutex.lock();
+        this->currentEventSequence = this->nextEventSequence;
+        this->nextEventSequence = NULL;
+        this->mutex.unlock();
+        this->sendEventSequenceToWebView();
+    }
+}
+
+/**
+ * Convert the current event sequence into the data format the JavaScript
+ * code expects, but then as QVariants. QxtJSON::stringify() will then
+ * encode this data as JSON, which the JavaScript code can use directly.
+ */
+void BarTreeVisualization::sendEventSequenceToWebView() {
+    QVariantMap data;
+    QMap<QString, int> inputTypeFrequency;
+    QMap<QString, QMap<QString, int> > eventTypeFrequency;
+    QMap<QString, QMap<QString, QMap<QString, int> > > modifierFrequency;
+    QString inputType, eventType, modifier, details;
+    QStringList detailsList;
+    Event * event;
+
+    // Count frequencies.
+    foreach (event, *this->currentEventSequence) {
+        inputType = event->getInputType();
+        eventType = event->getEventType();
+        details = event->getDetails();
+
+        // Clean up event type.
+        eventType.replace("Key", "");
+        eventType.replace("Mouse", "");
+
+        // Extract nice & clean "modifier" from event details.
+        if (QString(inputType).compare(QString("Mouse")) == 0) {
+            modifier = "none";
+        }
+        else {
+            modifier = "something";
+        }
+        detailsList = details.split(';');
+        if (inputType == "Mouse") {
+            modifier = detailsList[2];
+            if (modifier.length() == 0) {
+                modifier = "none";
+            }
+        }
+        else {
+            detailsList[2].replace(":", "");
+            bool modifierKeyPressed = (detailsList[2].length() > 0);
+            bool regularKeyPressed = (detailsList[1].length() > 0);
+            if (modifierKeyPressed && regularKeyPressed) {
+                modifier = detailsList[2] + "+" + detailsList[1];
+            }
+            else if (modifierKeyPressed && !regularKeyPressed) {
+                modifier = detailsList[2];
+            }
+            else if (!modifierKeyPressed && regularKeyPressed) {
+                modifier = detailsList[1];
+            }
+            else {
+                modifier = "other";
+            }
+        }
+
+
+        // Init inputTypeFrequency (1st level frequency counts).
+        if (!inputTypeFrequency.contains(inputType)) {
+            inputTypeFrequency.insert(inputType, 0);
+        }
+
+        // Init eventTypeFrequency (2nd level frequency counts).
+        if (!eventTypeFrequency.contains(inputType)) {
+            QMap<QString, int> map;
+            eventTypeFrequency.insert(inputType, map);
+        }
+        if (!eventTypeFrequency[inputType].contains(eventType)) {
+            eventTypeFrequency[inputType].insert(eventType, 0);
+        }
+
+        // Init modifierFrequency (3rd level frequency counts).
+        if (!modifierFrequency.contains(inputType)) {
+            QMap<QString, QMap<QString, int> > map;
+            modifierFrequency.insert(inputType, map);
+        }
+        if (!modifierFrequency[inputType].contains(eventType)) {
+            QMap<QString, int> map;
+            modifierFrequency[inputType].insert(eventType, map);
+        }
+        if (!modifierFrequency[inputType][eventType].contains(modifier)) {
+            modifierFrequency[inputType][eventType].insert(modifier, 0);
+        }
+
+        // Incrementalization.
+        inputTypeFrequency.insert(inputType, inputTypeFrequency.value(inputType) + 1);
+        eventTypeFrequency[inputType].insert(eventType, eventTypeFrequency[inputType][eventType] + 1);
+        modifierFrequency[inputType][eventType].insert(modifier, modifierFrequency[inputType][eventType][modifier] + 1);
+    }
+
+    // Build QVariantMap that represents the data in the format expected by the
+    // JavaScript code.
+    QString keyL1, keyL2, keyL3;
+    QVariantMap level1, level2, level3, tmp;
+    double totalL1, totalL2, totalL3;
+
+    totalL1 = BarTreeVisualization::calcTotalFreq(inputTypeFrequency);
+    level1.clear();
+    foreach (keyL1, inputTypeFrequency.keys()) {
+
+        totalL2 = BarTreeVisualization::calcTotalFreq(eventTypeFrequency[keyL1]);
+        level2.clear();
+        foreach (keyL2, eventTypeFrequency[keyL1].keys()) {
+
+            totalL3 = BarTreeVisualization::calcTotalFreq(modifierFrequency[keyL1][keyL2]);
+            level3.clear();
+            foreach(keyL3, modifierFrequency[keyL1][keyL2].keys()) {
+                tmp.clear();
+                tmp.insert("frequency", modifierFrequency[keyL1][keyL2][keyL3] / totalL3);
+                level3.insert(keyL3, tmp);
+            }
+
+            tmp.clear();
+            tmp.insert("frequency", eventTypeFrequency[keyL1][keyL2] / totalL2);
+            tmp.insert("children", level3);
+            level2.insert(keyL2, tmp);
+        }
+
+        tmp.clear();
+        tmp.insert("frequency", inputTypeFrequency[keyL1] / totalL1);
+        tmp.insert("children", level2);
+        level1.insert(keyL1, tmp);
+    }
+    data = level1;
+
+    QString json = QxtJSON::stringify(data);
+    qDebug() << "Generated JSON:" << json;
+    this->mainFrame->evaluateJavaScript(QString("barTreeView.loadData(%1);").arg(json));
+}
+
+/**
+ * Helper method to calculate the total frequency of a level.
+ */
+double BarTreeVisualization::calcTotalFreq(const QMap<QString, int> & frequencies) {
+    static QString key;
+    static double totalFrequency;
+
+    totalFrequency = 0;
+    foreach(key, frequencies.keys()) {
+        totalFrequency += frequencies[key];
+    }
+
+    return totalFrequency;
 }

@@ -40,6 +40,9 @@ void MainWindow::createContent() {
     QWidget* centralWidget = new QWidget(this);
     centralWidget->setLayout(mainLayout);
     this->setCentralWidget(centralWidget);
+
+    // Initially, load *all* events.
+    this->database->loadEvents(this->database->getMinEventTime(), this->database->getMaxEventTime());
 }
 
 /* After the database had fetched the valid events, given a time frame, it passes those events
@@ -47,6 +50,7 @@ void MainWindow::createContent() {
    that are outputting information, should invoke e.g. their update()-method here..
 */
 void MainWindow::onEventsLoaded(QVector<Event*> *events) {
+    /*
     for (int i = 0; i < events->count(); ++i) {
         qDebug() << events->at(i)->getTime() << " "
                  << events->at(i)->getEventType() << " "
@@ -54,6 +58,8 @@ void MainWindow::onEventsLoaded(QVector<Event*> *events) {
                  << events->at(i)->getWidget() << " "
                  << events->at(i)->getDetails();
     }
+    */
     //this->heatMapVis->update(events);
+    this->barTreeVis->eventSequenceChanged(events);
 }
 
