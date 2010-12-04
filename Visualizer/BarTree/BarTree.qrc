@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/BarTree">
+        <file>BarTree.html</file>
+        <file>raphael.js</file>
+    </qresource>
+</RCC>

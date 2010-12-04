@@ -10,7 +10,6 @@
           }
         </style>
         <script src="raphael.js"></script>
-        <!-- <script src="jquery-1.4.4.js"></script> -->
         <script type="text/javascript">
           function BarTreeView(domID, width, height) {
             var self = this;
@@ -359,7 +358,11 @@
           var barTreeView;
           window.onload = function() {
             barTreeView = new BarTreeView("holder");
-            barTreeView.loadData(data);
+            // Only load the sample data when not running in a QtWebKit-based
+            // browser.
+            if (navigator.userAgent.indexOf("Qt") == -1) {
+              barTreeView.loadData(data);
+            }
           };
         </script> 
     </head> 
