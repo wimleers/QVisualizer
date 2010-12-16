@@ -13,7 +13,6 @@ HEADERS += MainWindow.h \
            Database.h \
            TimeLineVisualization.h \
            Event.h \
-           MySpanSlider.h \
            BarTreeVisualization.h
 
 SOURCES += MainWindow.cpp \

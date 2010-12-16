@@ -7,17 +7,21 @@
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsProxyWidget>
+#include <QLabel>
+#include <QxtSpanSlider>
 
 #include "Database.h"
-#include "MySpanSlider.h"
 
 class TimeLineVisualization : public QWidget {
     Q_OBJECT
 
     private:
-        MySpanSlider *timeSlider;
+        QxtSpanSlider *timeSlider;
         QTimer *timer;
+        QLabel *minTimeValueLabel, *maxTimeValueLabel;
         QGridLayout *mainLayout;
+
+        QString msecsToString(const int mseconds) const;
 
     public:
         TimeLineVisualization(Database *database);
