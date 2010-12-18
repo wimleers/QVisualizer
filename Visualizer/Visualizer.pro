@@ -22,3 +22,23 @@ SOURCES += MainWindow.cpp \
            BarTreeVisualization.cpp
 
 OTHER_FILES += sql.sql
+
+
+
+
+# For temporary simplified debugging purposes: include a sample events.csv
+# file in the source code repository.
+OTHER_FILES += events.csv
+
+macx {
+    CONFIG -= app_bundle
+}
+
+# Copy all OTHER_FILES to the build directory when using shadow builds.
+!equals($${PWD}, $${OUT_PWD}) {
+    unix:COPY  = cp
+    win32:COPY = copy /y
+    for(other_file, OTHER_FILES) {
+          QMAKE_PRE_LINK += $${COPY} $${PWD}/$${other_file} $${OUT_PWD}/$${other_file};
+    }
+}

@@ -11,8 +11,12 @@
 #include <QDebug>
 #include <QProcess>
 #include <QDir>
+#include <QFile>
+#include <QTextStream>
 
 #include <QVector>
+
+#include <QSize>
 
 #include "Event.h"
 
@@ -21,6 +25,9 @@ class Database : public QObject {
 
     private:
         QSqlDatabase db;
+        QString csvFile;
+        QString csvFileForSQLite;
+        QSize resolution;
 
         QVector<Event*> *filteredEvents;
 
@@ -31,6 +38,11 @@ class Database : public QObject {
         int getMinEventTime();
         int getMaxEventTime();
         void close();
+
+        QSize getResolution() const;
+
+
+
 
     signals:
         void eventsLoaded(QVector<Event*> *);

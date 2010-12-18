@@ -2,7 +2,54 @@
 
 Database::Database() : QObject() {
     QProcess p;
+    this->csvFile = "events.csv";
+    this->csvFileForSQLite = "events-prepared-for-sqlite.csv";
 
+    // Parse the .csv file, and write a new .csv file specifically for SQLite,
+    // because it is limited in what it can import:
+    // http://www.sqlite.org/cvstrac/wiki?p=ImportingFiles
+    //
+    // The first two lines are typically ignored by spreadsheet apps; they
+    // are seen as comments. But SQLite interprets them as single columns. Yet
+    // we need some of the info on the first two lines. The third line
+    // contains the header names, but SQLite doesn't understand that either.
+    // So we parse those first 3 lines, and copy the rest of the .csv file to
+    // a new .csv file importable by SQLite.
+    QFile csv(this->csvFile);
+    if (!csv.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qCritical("Could not open '%s' file for reading: %s.", qPrintable(this->csvFile), qPrintable(csv.errorString()));
+        exit(1);
+    }
+    else {
+        QTextStream in(&csv);
+        QString line;
+        QStringList parts;
+        in.readLine(); // First line: date and time.
+        line = in.readLine(); // Second line: resolution.
+        parts = line.mid(14, line.length() - 13).split('x');
+        if (parts.length() == 2)
+            this->resolution = QSize(parts[0].toInt(), parts[1].toInt());
+        else
+            this->resolution = QSize(-1, -1); // In case somebody provides an invalid file.
+
+        // Third line: column headers.
+        in.readLine();
+
+        // Write all remaining lines to csvFileForSQLite.
+        QFile csvForSQLite(this->csvFileForSQLite);
+        if (!csvForSQLite.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
+            qCritical("Could not open '%s' file for reading: %s.", qPrintable(this->csvFileForSQLite), qPrintable(csvForSQLite.errorString()));
+            exit(1);
+        }
+        else {
+            QTextStream out(&csvForSQLite);
+            while (!in.atEnd()) {
+                out << in.readLine() << endl;
+            }
+        }
+    }
+
+    // Create the SQLite DB.
     static QString command = "sqlite3 db.sqlite < sql.sql && sqlite3 db.sqlite";
 #ifdef Q_OS_WIN32
     p.start(QString("cmd.exe /c %1").arg(command));
@@ -10,11 +57,11 @@ Database::Database() : QObject() {
     p.start(QString("sh -c \"%1\"").arg(command));
 #endif
 
+    // Import the csvFileForSQLite into the SQLite DB.
     if (p.waitForStarted(500)) {
         p.write(".separator ','\r\n");
-        p.write(".import events.csv Events\r\n");
+        p.write(qPrintable(QString(".import %1 Events\r\n").arg(this->csvFileForSQLite)));
         p.waitForFinished(1000);
-        qDebug() << "Imported recorded events." << p.readAllStandardOutput();
     }
     else
        qDebug() << "Failed to import recorded events into SQLite database.";
@@ -27,11 +74,18 @@ Database::Database() : QObject() {
         exit(1);
     }
 
+
     this->filteredEvents = new QVector<Event*>();
+
+    qDebug() << "@INNEKE" << "\tresolution:" << this->getResolution();
 }
 
 Database::~Database() {
     delete this->filteredEvents;
+}
+
+QSize Database::getResolution() const {
+    return this->resolution;
 }
 
 /* This method fetches all events having a timestamp from value 'start' up to 'stop'.
