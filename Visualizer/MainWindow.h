@@ -3,7 +3,9 @@
 
 #include "Database.h"
 #include "TimeLineVisualization.h"
+#include "HeatMapVisualization.h"
 #include "BarTreeVisualization.h"
+
 
 #include <QMainWindow>
 #include <QGridLayout>
@@ -16,7 +18,9 @@ class MainWindow : public QMainWindow {
         Database *database;
 
         TimeLineVisualization* timeLineVis;
-        BarTreeVisualization* barTreeVis;
+        HeatMapVisualization* heatMapVis;
+        //BarTreeVisualization* barTreeVis;
+
         QGridLayout *mainLayout;
 
         void closeEvent(QCloseEvent *e);

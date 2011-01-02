@@ -13,12 +13,14 @@ HEADERS += MainWindow.h \
            Database.h \
            TimeLineVisualization.h \
            Event.h \
+           HeatMapVisualization.h \
            BarTreeVisualization.h
 
 SOURCES += MainWindow.cpp \
            Database.cpp \
            Main.cpp \
            TimeLineVisualization.cpp \
+           HeatMapVisualization.cpp \
            BarTreeVisualization.cpp
 
 OTHER_FILES += sql.sql

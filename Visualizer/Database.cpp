@@ -76,8 +76,6 @@ Database::Database() : QObject() {
 
 
     this->filteredEvents = new QVector<Event*>();
-
-    qDebug() << "@INNEKE" << "\tresolution:" << this->getResolution();
 }
 
 Database::~Database() {

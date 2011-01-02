@@ -29,9 +29,9 @@ void MainWindow::createContent() {
     this->timeLineVis = new TimeLineVisualization(this->database);
     connect(this->timeLineVis, SIGNAL(timeSpanChanged(int, int)), this->database, SLOT(loadEvents(int, int)));
 
-    //this->heatMapVis = new HeatMapVisualization(this->database);
+    this->heatMapVis = new HeatMapVisualization(this->database->getResolution());
 
-    //mainLayout->addWidget(this->heatMapVis, 0, 0);
+    mainLayout->addWidget(this->heatMapVis, 0, 0);
     mainLayout->addWidget(this->timeLineVis, 1, 0);
 
     //this->barTreeVis = new BarTreeVisualization();
@@ -50,14 +50,7 @@ void MainWindow::createContent() {
    that are outputting information should invoke e.g. their update()-method here..
 */
 void MainWindow::onEventsLoaded(QVector<Event*> *events) {
-    for (int i = 0; i < events->count(); ++i) {
-        qDebug() << events->at(i)->getTime() << " "
-                 << events->at(i)->getEventType() << " "
-                 << events->at(i)->getInputType() << " "
-                 << events->at(i)->getWidget() << " "
-                 << events->at(i)->getDetails();
-    }
-    //this->heatMapVis->update(events);
+    this->heatMapVis->update(events); 
     //this->barTreeVis->eventSequenceChanged(events);
     this->timeLineVis->eventsSequenceChanged(events);
 }
