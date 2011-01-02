@@ -16,16 +16,25 @@ class TimeLineVisualization : public QWidget {
     Q_OBJECT
 
     private:
+        int minEventTime, maxEventTime;
+
         QxtSpanSlider *timeSlider;
         QTimer *timer;
         QLabel *minTimeValueLabel, *maxTimeValueLabel;
         QGridLayout *mainLayout;
+        QHBoxLayout *timeValueLabelsLayout;
+
+        QGraphicsScene *scene;
+        QGraphicsView *view;
+        QGraphicsRectItem *highlightedRect;
 
         QString msecsToString(const int mseconds) const;
 
     public:
         TimeLineVisualization(Database *database);
         ~TimeLineVisualization() {}
+
+        void eventsSequenceChanged(const QVector<Event*>* events);
 
     signals:
         void timeSpanChanged(int, int);

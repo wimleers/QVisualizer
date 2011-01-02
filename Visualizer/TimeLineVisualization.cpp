@@ -1,33 +1,78 @@
 #include "TimeLineVisualization.h"
 
 TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
-    this->timeSlider = new QxtSpanSlider(Qt::Horizontal);
-    this->timeSlider->setRange(database->getMinEventTime(), database->getMaxEventTime());
+    timeSlider = new QxtSpanSlider(Qt::Horizontal);
+    minEventTime = database->getMinEventTime();
+    maxEventTime = database->getMaxEventTime();
+    timeSlider->setRange(minEventTime, maxEventTime);
     // The line below forces the upper handle to be drawn correctly.
-    this->timeSlider->setUpperPosition(this->timeSlider->maximum());
+    timeSlider->setUpperPosition(timeSlider->maximum());
 
-    this->timer = new QTimer();
-    this->timer->setSingleShot(true);
-    this->timer->setInterval(100);
-    connect(this->timeSlider, SIGNAL(spanChanged(int, int)), this->timer, SLOT(start()));
-    connect(this->timer, SIGNAL(timeout()), SLOT(onTimeout()));
+    timer = new QTimer();
+    timer->setSingleShot(true);
+    timer->setInterval(100);
+    connect(timeSlider, SIGNAL(spanChanged(int, int)), timer, SLOT(start()));
+    connect(timer, SIGNAL(timeout()), SLOT(onTimeout()));
 
-    this->minTimeValueLabel = new QLabel(msecsToString(database->getMinEventTime()));
-    this->maxTimeValueLabel = new QLabel(msecsToString(database->getMaxEventTime()));
+    minTimeValueLabel = new QLabel(msecsToString(database->getMinEventTime()));
+    maxTimeValueLabel = new QLabel(msecsToString(database->getMaxEventTime()));
+    timeValueLabelsLayout = new QHBoxLayout();
+    timeValueLabelsLayout->addWidget(minTimeValueLabel, 0, Qt::AlignLeft);
+    timeValueLabelsLayout->addWidget(maxTimeValueLabel, 0, Qt::AlignRight);
+
+    scene = new QGraphicsScene();
+    view = new QGraphicsView(scene);
+    scene->setSceneRect(view->geometry());
+    view->setRenderHints(QPainter::Antialiasing);
+    view->show();
+
+    highlightedRect = scene->addRect(QRectF(0, 0, scene->width(), scene->height()),
+                                     QPen(QColor("red")),
+                                     QBrush(QColor(200, 30, 30, 50)));
 
     mainLayout = new QGridLayout();
-    mainLayout->addWidget(this->minTimeValueLabel, 0, 1, Qt::AlignLeft);
-    mainLayout->addWidget(this->maxTimeValueLabel, 0, 2, Qt::AlignRight);
-    mainLayout->addWidget(this->timeSlider, 1, 1);
+    mainLayout->addLayout(timeValueLabelsLayout, 0, 1);
+    mainLayout->addWidget(timeSlider, 1, 1);
+    mainLayout->addWidget(view, 2, 1);
 
-    this->setLayout(mainLayout);
-    this->show();
+    setLayout(mainLayout);
+    show();
 }
 
 void TimeLineVisualization::onTimeout() {
-    emit timeSpanChanged(this->timeSlider->lowerValue(), this->timeSlider->upperValue());
-    this->minTimeValueLabel->setText(msecsToString(this->timeSlider->lowerValue()));
-    this->maxTimeValueLabel->setText(msecsToString(this->timeSlider->upperValue()));
+    emit timeSpanChanged(timeSlider->lowerValue(), timeSlider->upperValue());
+    minTimeValueLabel->setText(msecsToString(timeSlider->lowerValue()));
+    maxTimeValueLabel->setText(msecsToString(timeSlider->upperValue()));
+
+    int leftX = ((float) timeSlider->lowerValue() / maxEventTime) * scene->width();
+    int rightX = ((float) timeSlider->upperValue() / maxEventTime) * scene->width();
+    highlightedRect->setRect(leftX, 0, rightX - leftX, scene->height());
+}
+
+void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events) {
+    Event *event;
+
+    foreach(event, *events) {
+        QString eventType = event->getEventType();
+        if(eventType.compare("MouseButtonPress")   *
+           eventType.compare("MouseButtonRelease") == 0) {
+
+            QAbstractGraphicsShapeItem *shape;
+            int shapeX = ((float) event->getTime() / maxEventTime) * scene->width();
+
+            if(eventType.compare("MouseButtonPress") == 0) {
+                shape = new QGraphicsEllipseItem(0, scene);
+                ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 50, 6, 6);
+            }
+            else if(eventType.compare("MouseButtonRelease") == 0) {
+                shape = new QGraphicsRectItem(0, scene);
+                ((QGraphicsRectItem*)shape)->setRect(shapeX, 80, 6, 6);
+            }
+            shape->setToolTip(QString("Time: ") + QString::number(event->getTime()) + "\n" +
+                                      "Type: " + event->getEventType() + "\n" +
+                                      "Details: " + event->getDetails());
+        }
+    }
 }
 
 /* Converts an integer that represents an amount of millliseconds to a better

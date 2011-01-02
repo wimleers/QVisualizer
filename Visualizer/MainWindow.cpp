@@ -34,23 +34,22 @@ void MainWindow::createContent() {
     //mainLayout->addWidget(this->heatMapVis, 0, 0);
     mainLayout->addWidget(this->timeLineVis, 1, 0);
 
-    this->barTreeVis = new BarTreeVisualization();
-    mainLayout->addWidget(this->barTreeVis, 0, 1);
+    //this->barTreeVis = new BarTreeVisualization();
+    //mainLayout->addWidget(this->barTreeVis, 0, 1);
 
     QWidget* centralWidget = new QWidget(this);
     centralWidget->setLayout(mainLayout);
     this->setCentralWidget(centralWidget);
 
     // Initially, load *all* events.
-    this->database->loadEvents(this->database->getMinEventTime(), this->database->getMaxEventTime());
+    //this->database->loadEvents(this->database->getMinEventTime(), this->database->getMaxEventTime());
 }
 
 /* After the database had fetched the valid events, given a time frame, it passes those events
    to this method, using a container of the type 'QVector<Event*>*'. All visualizations / widgets
-   that are outputting information, should invoke e.g. their update()-method here..
+   that are outputting information should invoke e.g. their update()-method here..
 */
 void MainWindow::onEventsLoaded(QVector<Event*> *events) {
-    /*
     for (int i = 0; i < events->count(); ++i) {
         qDebug() << events->at(i)->getTime() << " "
                  << events->at(i)->getEventType() << " "
@@ -58,8 +57,8 @@ void MainWindow::onEventsLoaded(QVector<Event*> *events) {
                  << events->at(i)->getWidget() << " "
                  << events->at(i)->getDetails();
     }
-    */
     //this->heatMapVis->update(events);
-    this->barTreeVis->eventSequenceChanged(events);
+    //this->barTreeVis->eventSequenceChanged(events);
+    this->timeLineVis->eventsSequenceChanged(events);
 }
 

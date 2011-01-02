@@ -50,7 +50,7 @@ Database::Database() : QObject() {
     }
 
     // Create the SQLite DB.
-    static QString command = "sqlite3 db.sqlite < sql.sql && sqlite3 db.sqlite";
+    /*static QString command = "sqlite3 db.sqlite < sql.sql && sqlite3 db.sqlite";
 #ifdef Q_OS_WIN32
     p.start(QString("cmd.exe /c %1").arg(command));
 #else
@@ -65,7 +65,7 @@ Database::Database() : QObject() {
     }
     else
        qDebug() << "Failed to import recorded events into SQLite database.";
-    p.close();
+    p.close();*/
 
     this->db = QSqlDatabase::addDatabase("QSQLITE");
     this->db.setDatabaseName("./db.sqlite");
