@@ -2,11 +2,12 @@
 
 HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
 
-    mainLayout = new QGridLayout();
+    mainLayout = new QVBoxLayout();
 
     this->setLayout(mainLayout);
     this->show();
 
+    lastEvents = NULL;
     height = resolution.height();
     width = resolution.width();
     qDebug() << "height: " << height << " width: " << width;
@@ -30,12 +31,41 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     heatMapLabel->setPixmap(QPixmap::fromImage(*image));
     mainLayout->addWidget(heatMapLabel);
 
+    QHBoxLayout *checkButtonLayout = new QHBoxLayout();
+    leftClickCheck = new QCheckBox("&Linker muisklik", this);
+    rightClickCheck = new QCheckBox("&Rechter muisklik", this);
+    clickCheck = new QCheckBox("&Eén muisklik", this);
+    doubleClickCheck = new QCheckBox("&Dubbel muisklik", this);
+
+    leftClickCheck->setCheckState(Qt::Checked);
+    rightClickCheck->setCheckState(Qt::Checked);
+    clickCheck->setCheckState(Qt::Checked);
+    doubleClickCheck->setCheckState(Qt::Checked);
+
+    connect(leftClickCheck, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
+    connect(rightClickCheck, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
+    connect(clickCheck, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
+    connect(doubleClickCheck, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
+
+    checkButtonLayout->addWidget(leftClickCheck);
+    checkButtonLayout->addWidget(rightClickCheck);
+    checkButtonLayout->addWidget(clickCheck);
+    checkButtonLayout->addWidget(doubleClickCheck);
+
+    mainLayout->addLayout(checkButtonLayout);
+
     renderVisualization();
 }
 
-void HeatMapVisualization::update(QVector<Event*> *events) {
+void HeatMapVisualization::update(QVector<Event*> *events = NULL) {
     //qDebug() << "HeatMapVisualization::update()";
     clearHeatMap();
+    if (events != NULL)
+        lastEvents = events;
+    else if (lastEvents != NULL)
+        events = lastEvents;
+    else
+        return;
     for (int i = 0; i < events->count(); ++i) {
         if ((click && events->at(i)->getEventType().compare("MouseButtonPress") == 0) || (doubleClick && events->at(i)->getEventType().compare("MouseButtonDblClick") == 0)) {
             //qDebug() << "Type: " << events->at(i)->getEventType();
@@ -148,4 +178,28 @@ void HeatMapVisualization::clearHeatMap() {
     for (int i = 0; i < height; ++i)
         for (int j = 0; j < width; ++j)
             heatMap[i][j] = 0;
+}
+
+void HeatMapVisualization::updateParameters(int state) {
+    if (leftClickCheck->checkState() == Qt::Checked)
+        leftClick = true;
+    else
+        leftClick = false;
+
+    if (rightClickCheck->checkState() == Qt::Checked)
+        rightClick = true;
+    else
+        rightClick = false;
+
+    if (clickCheck->checkState() == Qt::Checked)
+        click = true;
+    else
+        click = false;
+
+    if (doubleClickCheck->checkState() == Qt::Checked)
+        doubleClick = true;
+    else
+        doubleClick = false;
+
+    update(NULL);
 }

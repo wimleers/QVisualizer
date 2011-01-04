@@ -5,6 +5,7 @@
 #include <QGridLayout>
 #include <QDebug>
 #include <QLabel>
+#include <QCheckBox>
 
 #include "Event.h"
 
@@ -12,9 +13,15 @@ class HeatMapVisualization : public QWidget {
     Q_OBJECT
 
     private:
-        QGridLayout *mainLayout;
+        QVBoxLayout *mainLayout;
         QImage* image;
         QLabel *heatMapLabel;
+        QCheckBox *leftClickCheck;
+        QCheckBox *rightClickCheck;
+        QCheckBox *clickCheck;
+        QCheckBox *doubleClickCheck;
+
+        QVector<Event*> *lastEvents;
 
         int height, width;
         int **heatMap;
@@ -37,6 +44,9 @@ class HeatMapVisualization : public QWidget {
 
         void update(QVector<Event*> *events);
         void renderVisualization();
+
+    private slots:
+        void updateParameters(int state);
 
 };
 
