@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QLabel>
 #include <QCheckBox>
+#include <QGroupBox>
 
 #include "Event.h"
 
@@ -23,7 +24,7 @@ class HeatMapVisualization : public QWidget {
 
         QVector<Event*> *lastEvents;
 
-        int height, width;
+        int height, width, screenHeight, screenWidth;
         int **heatMap;
 
         int maxClicks;

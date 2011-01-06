@@ -24,16 +24,26 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     click = true;
     doubleClick = true;
 
+    screenWidth = 800;
+    screenHeight = 500;
+
     image = new QImage(width, height, QImage::Format_RGB32);
 
     heatMapLabel = new QLabel();
-    //heatMapLabel->setScaledContents(1);
+    /*heatMapLabel->setMinimumWidth(screenWidth);
+    heatMapLabel->setMaximumWidth(screenWidth);
+    heatMapLabel->setMinimumHeight(screenHeight);
+    heatMapLabel->setMaximumHeight(screenHeight);*/
     heatMapLabel->setPixmap(QPixmap::fromImage(*image));
     mainLayout->addWidget(heatMapLabel);
 
     QHBoxLayout *checkButtonLayout = new QHBoxLayout();
+    QGroupBox *box1 = new QGroupBox();
+    QVBoxLayout *box1Layout = new QVBoxLayout();
     leftClickCheck = new QCheckBox("&Linker muisklik", this);
     rightClickCheck = new QCheckBox("&Rechter muisklik", this);
+    QGroupBox *box2 = new QGroupBox();
+    QVBoxLayout *box2Layout = new QVBoxLayout();
     clickCheck = new QCheckBox("&Eén muisklik", this);
     doubleClickCheck = new QCheckBox("&Dubbel muisklik", this);
 
@@ -47,10 +57,16 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     connect(clickCheck, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
     connect(doubleClickCheck, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
 
-    checkButtonLayout->addWidget(leftClickCheck);
-    checkButtonLayout->addWidget(rightClickCheck);
-    checkButtonLayout->addWidget(clickCheck);
-    checkButtonLayout->addWidget(doubleClickCheck);
+    box1Layout->addWidget(leftClickCheck);
+    box1Layout->addWidget(rightClickCheck);
+    box2Layout->addWidget(clickCheck);
+    box2Layout->addWidget(doubleClickCheck);
+
+    box1->setLayout(box1Layout);
+    box2->setLayout(box2Layout);
+
+    checkButtonLayout->addWidget(box1);
+    checkButtonLayout->addWidget(box2);
 
     mainLayout->addLayout(checkButtonLayout);
 
@@ -156,8 +172,8 @@ void HeatMapVisualization::renderVisualization() {
             image->setPixel(j, i, color.rgb());
         }
     }
-
-    heatMapLabel->setPixmap(QPixmap::fromImage(*image));
+    QImage scaledImage = image->scaled(QSize(screenWidth,screenHeight),Qt::KeepAspectRatio);
+    heatMapLabel->setPixmap(QPixmap::fromImage(scaledImage));
 }
 
 void HeatMapVisualization::printHeatMap() {
