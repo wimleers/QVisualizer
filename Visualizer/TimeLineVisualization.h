@@ -2,7 +2,7 @@
 #define TIMELINEVISUALIZATION_H_
 
 #include <QWidget>
-#include <QGridLayout>
+#include <QVBoxLayout>
 #include <QTimer>
 #include <QGraphicsScene>
 #include <QGraphicsView>
@@ -21,7 +21,7 @@ class TimeLineVisualization : public QWidget {
         QxtSpanSlider *timeSlider;
         QTimer *timer;
         QLabel *minTimeValueLabel, *maxTimeValueLabel;
-        QGridLayout *mainLayout;
+        QVBoxLayout *mainLayout;
         QHBoxLayout *timeValueLabelsLayout;
 
         QGraphicsScene *scene;

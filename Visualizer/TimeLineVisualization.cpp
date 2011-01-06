@@ -22,6 +22,7 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
 
     scene = new QGraphicsScene();
     view = new QGraphicsView(scene);
+    view->setGeometry(0, 0, 470, 200);
     scene->setSceneRect(view->geometry());
     view->setRenderHints(QPainter::Antialiasing);
     view->show();
@@ -30,10 +31,15 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
                                      QPen(QColor("red")),
                                      QBrush(QColor(200, 30, 30, 50)));
 
-    mainLayout = new QGridLayout();
-    mainLayout->addLayout(timeValueLabelsLayout, 0, 1);
-    mainLayout->addWidget(timeSlider, 1, 1);
-    mainLayout->addWidget(view, 2, 1);
+    mainLayout = new QVBoxLayout();
+    mainLayout->addLayout(timeValueLabelsLayout);
+    mainLayout->addWidget(timeSlider);
+    mainLayout->addWidget(view);
+
+    setMinimumWidth(500);
+    setMaximumWidth(500);
+    setMinimumHeight(300);
+    setMaximumHeight(300);
 
     setLayout(mainLayout);
     show();
@@ -62,6 +68,10 @@ void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events
 
             if(eventType.compare("MouseButtonPress") == 0) {
                 shape = new QGraphicsEllipseItem(0, scene);
+                QBrush redBrush;
+                redBrush.setColor(Qt::red);
+
+                shape->setBrush(redBrush);
                 ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 50, 6, 6);
             }
             else if(eventType.compare("MouseButtonRelease") == 0) {

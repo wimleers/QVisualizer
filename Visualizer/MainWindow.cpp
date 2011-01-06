@@ -4,7 +4,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     this->database = new Database();
     connect(this->database, SIGNAL(eventsLoaded(QVector<Event*> *)), SLOT(onEventsLoaded(QVector<Event*> *)));
 
-    setGeometry(30, 30, 800, 600);
+    setGeometry(30, 30, 1024, 600);
     createContent();
 }
 
@@ -18,31 +18,32 @@ void MainWindow::closeEvent(QCloseEvent *e) {
 /* The general layout of the application is as follows:
    ---------
    | 1 | 2 |        1 = Inneke's heatmap
-   ----+ 2 |        2 = Wim's input ratio vis.
+   ----+ 2 |        2 = Wim's input ratio vis
    | 3 | 2 |        3 = Nick's interactive time line
    ---------
 */
 void MainWindow::createContent() {
-    mainLayout = new QGridLayout(); // Given the ascii drawing in the comment above,
-                                    // this might be swapped with a hbox + vbox.
+    heatMapVis = new HeatMapVisualization(database->getResolution());
 
-    this->timeLineVis = new TimeLineVisualization(this->database);
-    connect(this->timeLineVis, SIGNAL(timeSpanChanged(int, int)), this->database, SLOT(loadEvents(int, int)));
+    timeLineVis = new TimeLineVisualization(database);
+    connect(timeLineVis, SIGNAL(timeSpanChanged(int, int)), database, SLOT(loadEvents(int, int)));
 
-    this->heatMapVis = new HeatMapVisualization(this->database->getResolution());
+    barTreeVis = new BarTreeVisualization();
 
-    mainLayout->addWidget(this->heatMapVis, 0, 0);
-    mainLayout->addWidget(this->timeLineVis, 1, 0);
+    vbox = new QVBoxLayout();
+    vbox->addWidget(heatMapVis);
+    vbox->addWidget(timeLineVis, 1);
 
-    //this->barTreeVis = new BarTreeVisualization();
-    //mainLayout->addWidget(this->barTreeVis, 0, 1);
+    mainLayout = new QHBoxLayout();
+    mainLayout->addLayout(vbox);
+    mainLayout->addWidget(barTreeVis);
 
     QWidget* centralWidget = new QWidget(this);
     centralWidget->setLayout(mainLayout);
-    this->setCentralWidget(centralWidget);
+    setCentralWidget(centralWidget);
 
     // Initially, load *all* events.
-    //this->database->loadEvents(this->database->getMinEventTime(), this->database->getMaxEventTime());
+    database->loadEvents(database->getMinEventTime(), database->getMaxEventTime());
 }
 
 /* After the database had fetched the valid events, given a time frame, it passes those events
@@ -50,8 +51,8 @@ void MainWindow::createContent() {
    that are outputting information should invoke e.g. their update()-method here..
 */
 void MainWindow::onEventsLoaded(QVector<Event*> *events) {
-    this->heatMapVis->update(events); 
-    //this->barTreeVis->eventSequenceChanged(events);
-    this->timeLineVis->eventsSequenceChanged(events);
+    heatMapVis->update(events);
+    barTreeVis->eventSequenceChanged(events);
+    timeLineVis->eventsSequenceChanged(events);
 }
 

@@ -19,9 +19,10 @@ class MainWindow : public QMainWindow {
 
         TimeLineVisualization* timeLineVis;
         HeatMapVisualization* heatMapVis;
-        //BarTreeVisualization* barTreeVis;
+        BarTreeVisualization* barTreeVis;
 
-        QGridLayout *mainLayout;
+        QHBoxLayout *mainLayout;
+        QVBoxLayout *vbox;
 
         void closeEvent(QCloseEvent *e);
         void createContent();

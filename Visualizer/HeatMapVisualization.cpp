@@ -4,9 +4,6 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
 
     mainLayout = new QVBoxLayout();
 
-    this->setLayout(mainLayout);
-    this->show();
-
     lastEvents = NULL;
     height = resolution.height();
     width = resolution.width();
@@ -24,8 +21,8 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     click = true;
     doubleClick = true;
 
-    screenWidth = 800;
-    screenHeight = 500;
+    screenWidth = 500;
+    screenHeight = 300;
 
     image = new QImage(width, height, QImage::Format_RGB32);
 
@@ -35,7 +32,7 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     heatMapLabel->setMinimumHeight(screenHeight);
     heatMapLabel->setMaximumHeight(screenHeight);*/
     heatMapLabel->setPixmap(QPixmap::fromImage(*image));
-    mainLayout->addWidget(heatMapLabel);
+    mainLayout->addWidget(heatMapLabel, 0, Qt::AlignCenter);
 
     QHBoxLayout *checkButtonLayout = new QHBoxLayout();
     QGroupBox *box1 = new QGroupBox();
@@ -86,6 +83,9 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     mainLayout->addLayout(checkButtonLayout);
 
     renderVisualization();
+
+    this->setLayout(mainLayout);
+    this->show();
 }
 
 void HeatMapVisualization::update(QVector<Event*> *events = NULL) {
