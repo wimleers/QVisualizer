@@ -40,33 +40,48 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     QHBoxLayout *checkButtonLayout = new QHBoxLayout();
     QGroupBox *box1 = new QGroupBox();
     QVBoxLayout *box1Layout = new QVBoxLayout();
-    leftClickCheck = new QCheckBox("&Linker muisklik", this);
-    rightClickCheck = new QCheckBox("&Rechter muisklik", this);
+    leftClickCheckBox = new QCheckBox("&Linker muisklik", this);
+    rightClickCheckBox = new QCheckBox("&Rechter muisklik", this);
     QGroupBox *box2 = new QGroupBox();
     QVBoxLayout *box2Layout = new QVBoxLayout();
-    clickCheck = new QCheckBox("&Eén muisklik", this);
-    doubleClickCheck = new QCheckBox("&Dubbel muisklik", this);
+    clickCheckBox = new QCheckBox("&Eén muisklik", this);
+    doubleClickCheckBox = new QCheckBox("&Dubbel muisklik", this);
 
-    leftClickCheck->setCheckState(Qt::Checked);
-    rightClickCheck->setCheckState(Qt::Checked);
-    clickCheck->setCheckState(Qt::Checked);
-    doubleClickCheck->setCheckState(Qt::Checked);
+    leftClickCheckBox->setCheckState(Qt::Checked);
+    rightClickCheckBox->setCheckState(Qt::Checked);
+    clickCheckBox->setCheckState(Qt::Checked);
+    doubleClickCheckBox->setCheckState(Qt::Checked);
 
-    connect(leftClickCheck, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
-    connect(rightClickCheck, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
-    connect(clickCheck, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
-    connect(doubleClickCheck, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
+    connect(leftClickCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
+    connect(rightClickCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
+    connect(clickCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
+    connect(doubleClickCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
 
-    box1Layout->addWidget(leftClickCheck);
-    box1Layout->addWidget(rightClickCheck);
-    box2Layout->addWidget(clickCheck);
-    box2Layout->addWidget(doubleClickCheck);
+    box1Layout->addWidget(leftClickCheckBox);
+    box1Layout->addWidget(rightClickCheckBox);
+    box2Layout->addWidget(clickCheckBox);
+    box2Layout->addWidget(doubleClickCheckBox);
 
     box1->setLayout(box1Layout);
     box2->setLayout(box2Layout);
 
     checkButtonLayout->addWidget(box1);
     checkButtonLayout->addWidget(box2);
+
+    QLabel *margeLabel = new QLabel("Marge rond elke klik:");
+    margeSpinBox = new QSpinBox();
+    margeSpinBox->setRange(1, 100);
+    margeSpinBox->setValue(marge);
+    connect(margeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateMarge(int)));
+
+    QGroupBox *box3 = new QGroupBox();
+    QVBoxLayout *box3Layout = new QVBoxLayout();
+
+    box3Layout->addWidget(margeLabel);
+    box3Layout->addWidget(margeSpinBox);
+
+    box3->setLayout(box3Layout);
+    checkButtonLayout->addWidget(box3);
 
     mainLayout->addLayout(checkButtonLayout);
 
@@ -197,25 +212,31 @@ void HeatMapVisualization::clearHeatMap() {
 }
 
 void HeatMapVisualization::updateParameters(int state) {
-    if (leftClickCheck->checkState() == Qt::Checked)
+    if (leftClickCheckBox->checkState() == Qt::Checked)
         leftClick = true;
     else
         leftClick = false;
 
-    if (rightClickCheck->checkState() == Qt::Checked)
+    if (rightClickCheckBox->checkState() == Qt::Checked)
         rightClick = true;
     else
         rightClick = false;
 
-    if (clickCheck->checkState() == Qt::Checked)
+    if (clickCheckBox->checkState() == Qt::Checked)
         click = true;
     else
         click = false;
 
-    if (doubleClickCheck->checkState() == Qt::Checked)
+    if (doubleClickCheckBox->checkState() == Qt::Checked)
         doubleClick = true;
     else
         doubleClick = false;
+
+    update(NULL);
+}
+
+void HeatMapVisualization::updateMarge(int marge) {
+    this->marge = marge;
 
     update(NULL);
 }

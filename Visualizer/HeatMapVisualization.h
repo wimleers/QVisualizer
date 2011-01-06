@@ -7,6 +7,7 @@
 #include <QLabel>
 #include <QCheckBox>
 #include <QGroupBox>
+#include <QSpinBox>
 
 #include "Event.h"
 
@@ -17,10 +18,11 @@ class HeatMapVisualization : public QWidget {
         QVBoxLayout *mainLayout;
         QImage* image;
         QLabel *heatMapLabel;
-        QCheckBox *leftClickCheck;
-        QCheckBox *rightClickCheck;
-        QCheckBox *clickCheck;
-        QCheckBox *doubleClickCheck;
+        QCheckBox *leftClickCheckBox;
+        QCheckBox *rightClickCheckBox;
+        QCheckBox *clickCheckBox;
+        QCheckBox *doubleClickCheckBox;
+        QSpinBox *margeSpinBox;
 
         QVector<Event*> *lastEvents;
 
@@ -48,6 +50,7 @@ class HeatMapVisualization : public QWidget {
 
     private slots:
         void updateParameters(int state);
+        void updateMarge(int marge);
 
 };
 
