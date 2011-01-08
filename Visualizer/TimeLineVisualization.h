@@ -27,6 +27,7 @@ class TimeLineVisualization : public QWidget {
         QGraphicsScene *scene;
         QGraphicsView *view;
         QGraphicsRectItem *highlightedRect;
+        QBrush *redBrush, *blueBrush, *greenBrush;
 
         QString msecsToString(const int mseconds) const;
 

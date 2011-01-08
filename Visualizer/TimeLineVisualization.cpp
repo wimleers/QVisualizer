@@ -4,17 +4,17 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
     timeSlider = new QxtSpanSlider(Qt::Horizontal);
     minEventTime = database->getMinEventTime();
     maxEventTime = database->getMaxEventTime();
-    timeSlider->setRange(minEventTime, maxEventTime);
+    timeSlider->setRange(0, maxEventTime);
     // The line below forces the upper handle to be drawn correctly.
     timeSlider->setUpperPosition(timeSlider->maximum());
 
     timer = new QTimer();
     timer->setSingleShot(true);
-    timer->setInterval(100);
+    timer->setInterval(50);
     connect(timeSlider, SIGNAL(spanChanged(int, int)), timer, SLOT(start()));
     connect(timer, SIGNAL(timeout()), SLOT(onTimeout()));
 
-    minTimeValueLabel = new QLabel(msecsToString(database->getMinEventTime()));
+    minTimeValueLabel = new QLabel(msecsToString(0));
     maxTimeValueLabel = new QLabel(msecsToString(database->getMaxEventTime()));
     timeValueLabelsLayout = new QHBoxLayout();
     timeValueLabelsLayout->addWidget(minTimeValueLabel, 0, Qt::AlignLeft);
@@ -22,7 +22,7 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
 
     scene = new QGraphicsScene();
     view = new QGraphicsView(scene);
-    view->setGeometry(0, 0, 470, 200);
+    view->setGeometry(0, 0, 570, 200);
     scene->setSceneRect(view->geometry());
     view->setRenderHints(QPainter::Antialiasing);
     view->show();
@@ -36,8 +36,8 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
     mainLayout->addWidget(timeSlider);
     mainLayout->addWidget(view);
 
-    setMinimumWidth(500);
-    setMaximumWidth(500);
+    setMinimumWidth(600);
+    setMaximumWidth(600);
     setMinimumHeight(300);
     setMaximumHeight(300);
 
@@ -58,28 +58,43 @@ void TimeLineVisualization::onTimeout() {
 void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events) {
     Event *event;
 
+    redBrush = new QBrush(Qt::red);
+    blueBrush = new QBrush(Qt::blue);
+    greenBrush = new QBrush(Qt::green);
+
     foreach(event, *events) {
         QString eventType = event->getEventType();
         if(eventType.compare("MouseButtonPress")   *
-           eventType.compare("MouseButtonRelease") == 0) {
+           eventType.compare("MouseButtonRelease") *
+           eventType.compare("MouseButtonDblClick") *
+           eventType.compare("KeyRelease") == 0) {
 
             QAbstractGraphicsShapeItem *shape;
-            int shapeX = ((float) event->getTime() / maxEventTime) * scene->width();
+            int shapeX = (((float) event->getTime() / maxEventTime) * scene->width()) - 3;
 
             if(eventType.compare("MouseButtonPress") == 0) {
                 shape = new QGraphicsEllipseItem(0, scene);
-                QBrush redBrush;
-                redBrush.setColor(Qt::red);
-
-                shape->setBrush(redBrush);
-                ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 50, 6, 6);
+                shape->setBrush(*redBrush);
+                ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 30, 6, 6);
             }
             else if(eventType.compare("MouseButtonRelease") == 0) {
-                shape = new QGraphicsRectItem(0, scene);
-                ((QGraphicsRectItem*)shape)->setRect(shapeX, 80, 6, 6);
+                shape = new QGraphicsEllipseItem(0, scene);
+                shape->setBrush(*blueBrush);
+                ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 75, 6, 6);
             }
+            else if(eventType.compare("MouseButtonDblClick") == 0) {
+                shape = new QGraphicsEllipseItem(0, scene);
+                shape->setBrush(*greenBrush);
+                ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 120, 6, 6);
+            }
+            else if(eventType.compare("KeyRelease") == 0) {
+                shape = new QGraphicsRectItem(0, scene);
+                ((QGraphicsRectItem*)shape)->setRect(shapeX, 165, 5, 5);
+            }
+
             shape->setToolTip(QString("Time: ") + QString::number(event->getTime()) + "\n" +
                                       "Type: " + event->getEventType() + "\n" +
+                                      "Target widget: " + event->getWidget() + "\n" +
                                       "Details: " + event->getDetails());
         }
     }
