@@ -256,49 +256,26 @@ void HeatMapVisualization::clearHeatMap() {
 }
 
 void HeatMapVisualization::updateParameters(int state) {
-    if (leftClickCheckBox->checkState() == Qt::Checked)
-        leftClick = true;
-    else
-        leftClick = false;
+    leftClick = leftClickCheckBox->isChecked();
+    rightClick = rightClickCheckBox->isChecked();
+    mouseMoveRoute = mouseMoveRouteCheckBox->isChecked();
+    click = clickCheckBox->isChecked();
+    doubleClick = doubleClickCheckBox->isChecked();
+    mouseMove = mouseMoveCheckBox->isChecked();
 
-    if (rightClickCheckBox->checkState() == Qt::Checked)
-        rightClick = true;
-    else
-        rightClick = false;
-
-    if (mouseMoveRouteCheckBox->checkState() == Qt::Checked)
-        mouseMoveRoute = true;
-    else
-        mouseMoveRoute = false;
-
-    if (clickCheckBox->checkState() == Qt::Checked)
-        click = true;
-    else
-        click = false;
-
-    if (doubleClickCheckBox->checkState() == Qt::Checked)
-        doubleClick = true;
-    else
-        doubleClick = false;
-
-    if (mouseMoveCheckBox->checkState() == Qt::Checked)
-        mouseMove = true;
-    else
-        mouseMove = false;
-
-    update(NULL);
+    update();
 }
 
 void HeatMapVisualization::updateMarge(int marge) {
     this->marge = marge;
 
-    update(NULL);
+    update();
 }
 
 void HeatMapVisualization::updateMouseRouteInterval(int interval) {
-    this->mouseRouteInterval = interval;
+    mouseRouteInterval = interval;
 
-    update(NULL);
+    update();
 }
 
 void HeatMapVisualization::showImage() {
