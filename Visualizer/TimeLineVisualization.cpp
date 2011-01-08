@@ -87,6 +87,8 @@ void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events
 
         // Filter interesting events
         QString eventType = event->getEventType();
+        // Consider MouseButtonReleases as equivalent to MouseButtonPresses.
+        eventType.replace("MouseButtonRelease", "MouseButtonPress");
         if(eventType.compare("MouseButtonPress")  *
            eventType.compare("MouseButtonDblClick") *
            eventType.compare("KeyRelease") == 0) {
