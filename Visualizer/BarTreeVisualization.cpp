@@ -65,7 +65,6 @@ void BarTreeVisualization::sendEventSequenceToWebView() {
         details = event->getDetails();
 
         // Clean up event type for optimized display.
-        qDebug() << eventType;
         eventType.replace("Key", "");
         eventType.replace("Mouse", "");
         // Keyboard.
@@ -159,17 +158,20 @@ void BarTreeVisualization::sendEventSequenceToWebView() {
             level3.clear();
             foreach(keyL3, modifierFrequency[keyL1][keyL2].keys()) {
                 tmp.clear();
+                tmp.insert("count",     modifierFrequency[keyL1][keyL2][keyL3]);
                 tmp.insert("frequency", modifierFrequency[keyL1][keyL2][keyL3] / totalL3);
                 level3.insert(keyL3, tmp);
             }
 
             tmp.clear();
+            tmp.insert("count",     eventTypeFrequency[keyL1][keyL2]);
             tmp.insert("frequency", eventTypeFrequency[keyL1][keyL2] / totalL2);
             tmp.insert("children", level3);
             level2.insert(keyL2, tmp);
         }
 
         tmp.clear();
+        tmp.insert("count",     inputTypeFrequency[keyL1] / totalL1);
         tmp.insert("frequency", inputTypeFrequency[keyL1] / totalL1);
         tmp.insert("children", level2);
 
