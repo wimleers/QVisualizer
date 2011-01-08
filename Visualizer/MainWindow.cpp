@@ -4,7 +4,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
     this->database = new Database();
     connect(this->database, SIGNAL(eventsLoaded(QVector<Event*> *)), SLOT(onEventsLoaded(QVector<Event*> *)));
 
-    setGeometry(30, 30, 1024, 600);
+    setGeometry(30, 30, 1200, 600);
     createContent();
 }
 

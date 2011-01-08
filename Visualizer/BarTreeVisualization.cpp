@@ -64,9 +64,16 @@ void BarTreeVisualization::sendEventSequenceToWebView() {
         eventType = event->getEventType();
         details = event->getDetails();
 
-        // Clean up event type.
+        // Clean up event type for optimized display.
+        qDebug() << eventType;
         eventType.replace("Key", "");
         eventType.replace("Mouse", "");
+        // Keyboard.
+        eventType.replace("Release", "Press");
+        // Mouse.
+        eventType.replace("ButtonPress", "Click");
+        eventType.replace("ButtonRelease", "Click");
+        eventType.replace("ButtonDblClick", "Double");
 
         // Extract nice & clean "modifier" from event details.
         if (QString(inputType).compare(QString("Mouse")) == 0) {
@@ -165,6 +172,10 @@ void BarTreeVisualization::sendEventSequenceToWebView() {
         tmp.clear();
         tmp.insert("frequency", inputTypeFrequency[keyL1] / totalL1);
         tmp.insert("children", level2);
+
+        // Assign color depending on input type.
+        tmp.insert("color", (keyL1 == "Mouse") ? BARTREEVISUALIZATION_COLOR_MOUSE : BARTREEVISUALIZATION_COLOR_KEYBOARD);
+
         level1.insert(keyL1, tmp);
     }
     data = level1;
