@@ -233,6 +233,26 @@ void HeatMapVisualization::renderVisualization() {
 
 }
 
+void HeatMapVisualization::highlightEventLocation(int msec) {
+    for (int i = 0; i < lastEvents->size(); ++i)
+        if (lastEvents->at(i)->getTime() == msec) {
+            QString details = lastEvents->at(i)->getDetails();
+            details.remove("\"");
+
+            QStringList args = details.split(";");
+            if (args.count() >= 2) {
+                QPoint p = QPoint(args.at(0).toInt(), args.at(1).toInt());
+
+                QPainter painter;
+                painter.begin(image);
+                painter.drawEllipse(p, 1, 1);
+                painter.end();
+            }
+        }
+    QImage scaledImage = image->scaled(QSize(screenWidth,screenHeight),Qt::KeepAspectRatio);
+    heatMapLabel->setPixmap(QPixmap::fromImage(scaledImage));
+}
+
 int HeatMapVisualization::max(int a, int b) {
     return (a>b)?a:b;
 }

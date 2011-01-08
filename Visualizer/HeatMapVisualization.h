@@ -49,6 +49,7 @@ class HeatMapVisualization : public QWidget {
 
         void update(QVector<Event*> *events);
         void renderVisualization();
+        void highlightEventLocation(int msec);
 
     private slots:
         void updateParameters(int state);
