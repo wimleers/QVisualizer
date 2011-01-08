@@ -28,6 +28,7 @@ signals:
 public slots:
     void loadHasFinished(bool ok);
     void eventSequenceChanged(QVector<Event *> * events);
+    void highlightEventLocation(int msecs, const QString & eventType);
 
 protected:
     void timerEvent(QTimerEvent *);

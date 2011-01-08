@@ -23,12 +23,12 @@ void MainWindow::closeEvent(QCloseEvent *e) {
 */
 void MainWindow::createContent() {
     heatMapVis = new HeatMapVisualization(database->getResolution());
-
-    timeLineVis = new TimeLineVisualization(database);
-    connect(timeLineVis, SIGNAL(timeSpanChanged(int, int)), database, SLOT(loadEvents(int, int)));
-    connect(timeLineVis, SIGNAL(onEventShapeClicked(int)), heatMapVis, SLOT(highlightEventLocation(int)));
-
     barTreeVis = new BarTreeVisualization();
+    timeLineVis = new TimeLineVisualization(database);
+
+    connect(timeLineVis, SIGNAL(timeSpanChanged(int, int)), database, SLOT(loadEvents(int, int)));
+    connect(timeLineVis, SIGNAL(onEventShapeClicked(int, const QString &)), heatMapVis, SLOT(highlightEventLocation(int)));
+    connect(timeLineVis, SIGNAL(onEventShapeClicked(int, const QString &)), barTreeVis, SLOT(highlightEventLocation(int, const QString &)));
 
     vbox = new QVBoxLayout();
     vbox->addWidget(heatMapVis);

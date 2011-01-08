@@ -21,7 +21,7 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
     timeValueLabelsLayout->addWidget(maxTimeValueLabel, 0, Qt::AlignRight);
 
     scene = new CustomQGraphicsScene();
-    connect(scene, SIGNAL(eventShapeClicked(int)), SIGNAL(onEventShapeClicked(int)));
+    connect(scene, SIGNAL(eventShapeClicked(int, const QString &)), SIGNAL(onEventShapeClicked(int, const QString &)));
     view = new QGraphicsView(scene);
     view->setGeometry(0, 0, 570, 200);
     scene->setSceneRect(view->geometry());
@@ -97,17 +97,17 @@ void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events
             int shapeX = (((float) event->getTime() / maxEventTime) * scene->width()) - 3;
 
             if(eventType.compare("MouseButtonPress") == 0) {
-                shape = new CustomQGraphicsEllipseItem(event->getTime());
+                shape = new CustomQGraphicsEllipseItem(event->getTime(), eventType);
                 shape->setBrush(*redBrush);
                 ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 30, 6, 6);
             }
             else if(eventType.compare("MouseButtonRelease") == 0) {
-                shape = new CustomQGraphicsEllipseItem(event->getTime());
+                shape = new CustomQGraphicsEllipseItem(event->getTime(), eventType);
                 shape->setBrush(*blueBrush);
                 ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 75, 6, 6);
             }
             else if(eventType.compare("MouseButtonDblClick") == 0) {
-                shape = new CustomQGraphicsEllipseItem(event->getTime());
+                shape = new CustomQGraphicsEllipseItem(event->getTime(), eventType);
                 shape->setBrush(*greenBrush);
                 ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 120, 6, 6);
             }

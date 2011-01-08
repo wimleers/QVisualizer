@@ -21,6 +21,10 @@ void BarTreeVisualization::eventSequenceChanged(QVector<Event *> * events) {
     this->mutex.unlock();
 }
 
+void BarTreeVisualization::highlightEventLocation(int msecs, const QString & eventType) {
+    qDebug() << eventType;
+}
+
 /**
  * Periodically (BARTREEVISUALIZATION_DATA_REFRESH_INTERVAL intervals) poll
  * to see if there's a new event sequence to draw. We do this using polling

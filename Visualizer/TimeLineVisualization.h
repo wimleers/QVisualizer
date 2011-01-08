@@ -41,7 +41,7 @@ class TimeLineVisualization : public QWidget {
 
     signals:
         void timeSpanChanged(int, int);
-        void onEventShapeClicked(int);
+        void onEventShapeClicked(int msecs, const QString & eventType);
 
     private slots:
         void onTimeout();

@@ -15,12 +15,12 @@ class CustomQGraphicsScene: public QGraphicsScene {
         void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) {
             CustomQGraphicsEllipseItem* clickedShape = (CustomQGraphicsEllipseItem*) itemAt(mouseEvent->scenePos().x(), mouseEvent->scenePos().y());
             if(clickedShape != NULL) { // TODO: add check on type of object
-                emit(eventShapeClicked(clickedShape->getTime()));
+                emit(eventShapeClicked(clickedShape->getTime(), clickedShape->getEventType()));
             }
         }
 
     signals:
-        void eventShapeClicked(int);
+        void eventShapeClicked(int msecs, const QString & eventType);
 };
 
 #endif
