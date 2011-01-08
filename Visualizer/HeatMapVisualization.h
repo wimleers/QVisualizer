@@ -23,14 +23,10 @@ class HeatMapVisualization : public QWidget {
         QVBoxLayout *mainLayout;
         QImage* image;
         QLabel *heatMapLabel;
-        QCheckBox *leftClickCheckBox;
-        QCheckBox *rightClickCheckBox;
-        QCheckBox *mouseMoveRouteCheckBox;
-        QCheckBox *clickCheckBox;
-        QCheckBox *doubleClickCheckBox;
-        QCheckBox *mouseMoveCheckBox;
-        QSpinBox *margeSpinBox;
-        QSpinBox *mouseRouteIntervalSpinBox;
+        QCheckBox *showLeftClicksCheckBox, *showRightClicksCheckBox;
+        QCheckBox *showSingleClicksCheckBox, *showDoubleClicksCheckBox;
+        QCheckBox *showMouseMoveCheckBox, *showMouseMoveRouteCheckBox;;
+        QSpinBox *margeSpinBox, *mouseRouteIntervalSpinBox;
 
         QVector<Event*> *lastEvents;
 
@@ -41,7 +37,7 @@ class HeatMapVisualization : public QWidget {
         int maxClicks;
         int marge, mouseRouteInterval;
 
-        bool leftClick, rightClick, click, doubleClick, mouseMove, mouseMoveRoute;
+        bool showLeftClicks, showRightClicks, showSingleClicks, showDoubleClicks, showMouseMove, showMouseMoveRoute;
 
         int max(int a, int b);
         void clickOnHeatMap(int x, int y);

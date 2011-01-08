@@ -2,8 +2,6 @@
 
 HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
 
-    mainLayout = new QVBoxLayout();
-
     lastEvents = NULL;
     height = resolution.height();
     width = resolution.width();
@@ -19,12 +17,8 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     marge = 40;
     mouseRouteInterval = 1;
 
-    leftClick = true;
-    rightClick = true;
-    mouseMoveRoute = true;
-    click = true;
-    doubleClick = true;
-    mouseMove = false;
+    showLeftClicks = showRightClicks = showSingleClicks = showDoubleClicks = showMouseMoveRoute = true;
+    showMouseMove = false;
 
     screenWidth = 500;
     screenHeight = 300;
@@ -34,98 +28,100 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     heatMapLabel = new QLabel();
     heatMapLabel->setPixmap(QPixmap::fromImage(*image));
     QPushButton *showImageButton = new QPushButton("Afbeelding in oorspronkelijke grootte");
-    connect(showImageButton, SIGNAL(clicked()), this, SLOT(showImage()));
+    connect(showImageButton, SIGNAL(clicked()), SLOT(showImage()));
 
-    mainLayout->addWidget(heatMapLabel, 0, Qt::AlignCenter);
-    mainLayout->addWidget(showImageButton,0,Qt::AlignCenter);
-
-    QHBoxLayout *checkButtonLayout = new QHBoxLayout();
     QGroupBox *box1 = new QGroupBox();
-    QVBoxLayout *box1Layout = new QVBoxLayout();
-    leftClickCheckBox = new QCheckBox("&Linker muisklik", this);
-    rightClickCheckBox = new QCheckBox("&Rechter muisklik", this);
-    mouseMoveRouteCheckBox = new QCheckBox("&Traject muisbewegingen");
+    QVBoxLayout *vbox1 = new QVBoxLayout();
+    showLeftClicksCheckBox = new QCheckBox("Show left-clicks");
+    showRightClicksCheckBox = new QCheckBox("Show right-clicks");
+    vbox1->addWidget(showLeftClicksCheckBox);
+    vbox1->addWidget(showRightClicksCheckBox);
+    box1->setLayout(vbox1);
+
     QGroupBox *box2 = new QGroupBox();
-    QVBoxLayout *box2Layout = new QVBoxLayout();
-    clickCheckBox = new QCheckBox("&Eén muisklik", this);
-    doubleClickCheckBox = new QCheckBox("&Dubbel muisklik", this);
-    mouseMoveCheckBox = new QCheckBox("&Muisbewegingen", this);
+    QVBoxLayout *vbox2 = new QVBoxLayout();
+    showSingleClicksCheckBox = new QCheckBox("Show single-clicks");
+    showDoubleClicksCheckBox = new QCheckBox("Show double-clicks");
+    vbox2->addWidget(showSingleClicksCheckBox);
+    vbox2->addWidget(showDoubleClicksCheckBox);
+    box2->setLayout(vbox2);
 
-    leftClickCheckBox->setChecked(leftClick);
-    rightClickCheckBox->setChecked(rightClick);
-    mouseMoveRouteCheckBox->setChecked(mouseMoveRoute);
-    clickCheckBox->setChecked(click);
-    doubleClickCheckBox->setChecked(doubleClick);
-    mouseMoveCheckBox->setChecked(mouseMove);
+    QGroupBox *box3 = new QGroupBox();
+    QVBoxLayout *vbox3 = new QVBoxLayout();
+    showMouseMoveRouteCheckBox = new QCheckBox("Show mouse route");
+    showMouseMoveCheckBox = new QCheckBox("Show mouse moves");
+    vbox3->addWidget(showMouseMoveRouteCheckBox);
+    vbox3->addWidget(showMouseMoveCheckBox);
+    box3->setLayout(vbox3);
 
-    connect(leftClickCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
-    connect(rightClickCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
-    connect(mouseMoveRouteCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
-    connect(clickCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
-    connect(doubleClickCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
-    connect(mouseMoveCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
+    showLeftClicksCheckBox->setChecked(showLeftClicks);
+    showRightClicksCheckBox->setChecked(showRightClicks);
+    showSingleClicksCheckBox->setChecked(showSingleClicks);
+    showDoubleClicksCheckBox->setChecked(showDoubleClicks);
+    showMouseMoveCheckBox->setChecked(showMouseMove);
+    showMouseMoveRouteCheckBox->setChecked(showMouseMoveRoute);
 
-    box1Layout->addWidget(leftClickCheckBox);
-    box1Layout->addWidget(rightClickCheckBox);
-    box1Layout->addWidget(mouseMoveRouteCheckBox);
-    box2Layout->addWidget(clickCheckBox);
-    box2Layout->addWidget(doubleClickCheckBox);
-    box2Layout->addWidget(mouseMoveCheckBox);
+    connect(showLeftClicksCheckBox, SIGNAL(stateChanged(int)), SLOT(updateParameters(int)));
+    connect(showRightClicksCheckBox, SIGNAL(stateChanged(int)), SLOT(updateParameters(int)));
+    connect(showSingleClicksCheckBox, SIGNAL(stateChanged(int)), SLOT(updateParameters(int)));
+    connect(showDoubleClicksCheckBox, SIGNAL(stateChanged(int)), SLOT(updateParameters(int)));
+    connect(showMouseMoveCheckBox, SIGNAL(stateChanged(int)), SLOT(updateParameters(int)));
+    connect(showMouseMoveRouteCheckBox, SIGNAL(stateChanged(int)), SLOT(updateParameters(int)));
 
-    box1->setLayout(box1Layout);
-    box2->setLayout(box2Layout);
-
-    checkButtonLayout->addWidget(box1);
-    checkButtonLayout->addWidget(box2);
-
-    QLabel *margeLabel = new QLabel("Marge rond elke klik:");
+    QLabel *margeLabel = new QLabel("Click radius: ");
     margeSpinBox = new QSpinBox();
     margeSpinBox->setRange(1, 100);
     margeSpinBox->setValue(marge);
-    connect(margeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateMarge(int)));
+    connect(margeSpinBox, SIGNAL(valueChanged(int)), SLOT(updateMarge(int)));
 
-    QLabel *mouseRouteIntervalLabel = new QLabel("Nauwkeurigheid van muisbewegingen");
+    QLabel *mouseRouteIntervalLabel = new QLabel("Mouse move accuracy: ");
     mouseRouteIntervalSpinBox = new QSpinBox();
     mouseRouteIntervalSpinBox->setRange(1, 100);
     mouseRouteIntervalSpinBox->setValue(mouseRouteInterval);
-    connect(mouseRouteIntervalSpinBox, SIGNAL(valueChanged(int)), this, SLOT(updateMouseRouteInterval(int)));
+    connect(mouseRouteIntervalSpinBox, SIGNAL(valueChanged(int)), SLOT(updateMouseRouteInterval(int)));
 
-    QGroupBox *box3 = new QGroupBox();
-    QVBoxLayout *box3Layout = new QVBoxLayout();
+    QGroupBox *box4 = new QGroupBox();
+    QVBoxLayout *vbox4 = new QVBoxLayout();
+    vbox4->addWidget(margeLabel);
+    vbox4->addWidget(margeSpinBox);
+    vbox4->addWidget(mouseRouteIntervalLabel);
+    vbox4->addWidget(mouseRouteIntervalSpinBox);
+    box4->setLayout(vbox4);
 
-    box3Layout->addWidget(margeLabel);
-    box3Layout->addWidget(margeSpinBox);
-    box3Layout->addWidget(mouseRouteIntervalLabel);
-    box3Layout->addWidget(mouseRouteIntervalSpinBox);
+    QHBoxLayout *inputLayout = new QHBoxLayout();
+    inputLayout->addWidget(box1);
+    inputLayout->addWidget(box2);
+    inputLayout->addWidget(box3);
+    inputLayout->addWidget(box4);
 
-    box3->setLayout(box3Layout);
-    checkButtonLayout->addWidget(box3);
-
-    mainLayout->addLayout(checkButtonLayout);
+    mainLayout = new QVBoxLayout();
+    mainLayout->addWidget(heatMapLabel, 0, Qt::AlignCenter);
+    mainLayout->addWidget(showImageButton, 0, Qt::AlignCenter);
+    mainLayout->addLayout(inputLayout);
 
     renderVisualization();
 
-    this->setLayout(mainLayout);
-    this->show();
+    setLayout(mainLayout);
 }
 
 void HeatMapVisualization::update(QVector<Event*> *events = NULL) {
-    //qDebug() << "HeatMapVisualization::update()";
     clearHeatMap();
-    if (events != NULL)
+
+    if(events != NULL)
         lastEvents = events;
-    else if (lastEvents != NULL)
+    else if(lastEvents != NULL)
         events = lastEvents;
     else
         return;
     int counter = 0, mouseRouteX = 0, mouseRouteY = 0;
-    for (int i = 0; i < events->count(); ++i) {
-        if ((click && events->at(i)->getEventType().compare("MouseButtonPress") == 0) || (doubleClick && events->at(i)->getEventType().compare("MouseButtonDblClick") == 0) || ((mouseMove || mouseMoveRoute) && events->at(i)->getEventType().compare("MouseMove") == 0)) {
+    for(int i = 0; i < events->count(); ++i) {
+        if((showSingleClicks && events->at(i)->getEventType().compare("MouseButtonPress") == 0) ||
+           (showDoubleClicks && events->at(i)->getEventType().compare("MouseButtonDblClick") == 0) ||
+           ((showMouseMove || showMouseMoveRoute) && events->at(i)->getEventType().compare("MouseMove") == 0)) {
             // enkel muiskliks (enkel en dubbel)
-            //qDebug() << "Type: " << events->at(i)->getEventType();
 
             QString details = events->at(i)->getDetails();
-            details.remove("\"");//remove "
+            details.remove("\"");
 
             QStringList args = details.split(";");
             if (args.count() >= 2) {
@@ -134,16 +130,16 @@ void HeatMapVisualization::update(QVector<Event*> *events = NULL) {
 
                 //qDebug() << details << x  << y;
                 if (x >= 0 && y >= 0 && x < height && y < width)  {
-                    if (mouseMove && events->at(i)->getEventType().compare("MouseMove") == 0)
+                    if (showMouseMove && events->at(i)->getEventType().compare("MouseMove") == 0)
                         clickOnHeatMap(x,y);
-                    if ((click || doubleClick) && args.count() == 3 && events->at(i)->getEventType().compare("MouseMove") != 0) {
+                    if ((showSingleClicks || showDoubleClicks) && args.count() == 3 && events->at(i)->getEventType().compare("MouseMove") != 0) {
                         // controleren: links en rechts filteren indien nodig (checkBoxes)
-                        if (leftClick && args.at(2).indexOf("L") != -1)// args.at(2) == ""L"	" "
+                        if (showLeftClicks && args.at(2).indexOf("L") != -1)// args.at(2) == ""L"	" "
                             clickOnHeatMap(x,y);
-                        else if (rightClick && args.at(2).indexOf("R") != -1)
+                        else if (showRightClicks && args.at(2).indexOf("R") != -1)
                             clickOnHeatMap(x,y);
                     }
-                    if (mouseMoveRoute && events->at(i)->getEventType().compare("MouseMove") == 0) { //muisbewegingen tekenen => gemiddeld punt berekenen per mouseRouteInterval bewegingen
+                    if (showMouseMoveRoute && events->at(i)->getEventType().compare("MouseMove") == 0) { //muisbewegingen tekenen => gemiddeld punt berekenen per mouseRouteInterval bewegingen
                         if (counter < mouseRouteInterval) {
                             mouseRouteX += x;
                             mouseRouteY += y;
@@ -252,12 +248,26 @@ void HeatMapVisualization::clearHeatMap() {
 }
 
 void HeatMapVisualization::updateParameters(int state) {
-    leftClick = leftClickCheckBox->isChecked();
-    rightClick = rightClickCheckBox->isChecked();
-    mouseMoveRoute = mouseMoveRouteCheckBox->isChecked();
-    click = clickCheckBox->isChecked();
-    doubleClick = doubleClickCheckBox->isChecked();
-    mouseMove = mouseMoveCheckBox->isChecked();
+    Q_UNUSED(state);
+
+    showLeftClicks = showLeftClicksCheckBox->isChecked();
+    showRightClicks = showRightClicksCheckBox->isChecked();
+    showSingleClicks = showSingleClicksCheckBox->isChecked();
+    showDoubleClicks = showDoubleClicksCheckBox->isChecked();
+    showMouseMove = showMouseMoveCheckBox->isChecked();
+    showMouseMoveRoute = showMouseMoveRouteCheckBox->isChecked();
+
+    showLeftClicksCheckBox->setEnabled(true);
+    showRightClicksCheckBox->setEnabled(true);
+    showSingleClicksCheckBox->setEnabled(true);
+    showDoubleClicksCheckBox->setEnabled(true);
+    showMouseMoveCheckBox->setEnabled(true);
+    showMouseMoveRouteCheckBox->setEnabled(true);
+
+    if(!showSingleClicks && !showDoubleClicks) {
+        showLeftClicksCheckBox->setEnabled(false);
+        showRightClicksCheckBox->setEnabled(false);
+    }
 
     update();
 }

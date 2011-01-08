@@ -25,7 +25,7 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
     view->setGeometry(0, 0, 570, 200);
     scene->setSceneRect(view->geometry());
     view->setRenderHints(QPainter::Antialiasing);
-    view->show();
+    //view->show();
 
     mainLayout = new QVBoxLayout();
     mainLayout->addLayout(timeValueLabelsLayout);
@@ -38,7 +38,6 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
     setMaximumHeight(300);
 
     setLayout(mainLayout);
-    show();
 }
 
 void TimeLineVisualization::onTimeout() {
@@ -54,18 +53,27 @@ void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events
     blueBrush = new QBrush(Qt::blue);
     greenBrush = new QBrush(Qt::green);
 
+    /* Clear the scene
+     * QGraphicsScene::clear() crashes, so this is a workaround
+     */
     QGraphicsItem *item;
     foreach(item, scene->items()) {
         scene->removeItem(item);
     }
 
+    /* Draw the red semi-transparant rectangle that graphically indicates
+     * which are the vertical boundaries in the graphics scene below.
+     */
     int leftX = ((float) timeSlider->lowerValue() / maxEventTime) * scene->width();
     int rightX = ((float) timeSlider->upperValue() / maxEventTime) * scene->width();
     highlightedRect = scene->addRect(leftX, 0, rightX - leftX, scene->height(),
                                      QPen(QColor("red")),
                                      QBrush(QColor(200, 30, 30, 50)));
 
-    QString axisLabels[] = {"Linkermuiskliks", "Rechtermuiskliks", "Dubbelmuiskliks", "Toetsenbordaanslagen"};
+    /* Draw four horizontal and labeled lines that will each graphically 'contain'
+     * a series of events of the according type.
+     */
+    QString axisLabels[] = {"Mouse left-click", "Mouse right-click", "Mouse double-click", "Keyboard"};
     for(int i = 0; i < 4; ++i) {
         scene->addLine(2, 33 + (i * 45), scene->width() - 2, 33 + (i * 45));
         QGraphicsSimpleTextItem *label = new QGraphicsSimpleTextItem();
@@ -74,7 +82,10 @@ void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events
         scene->addItem(label);
     }
 
+    // Iterate over all incoming events
     foreach(event, *events) {
+
+        // Filter interesting events
         QString eventType = event->getEventType();
         if(eventType.compare("MouseButtonPress")    *
            eventType.compare("MouseButtonRelease")  *
@@ -113,7 +124,7 @@ void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events
 }
 
 /* Converts an integer that represents an amount of millliseconds to a better
-   understandable format. E.g.: 1234(ms) to "1.234s" and 71600(ms) to "1m11.6s".
+ * understandable format. E.g.: 1234(ms) to "1.234s" and 71600(ms) to "1m11.6s".
  */
 QString TimeLineVisualization::msecsToString(const int mseconds) const {
     return QString::number((mseconds / 1000) / 60) + "m"
