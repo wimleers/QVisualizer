@@ -1,18 +1,17 @@
 #include "MainWindow.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-    this->database = new Database();
-    connect(this->database, SIGNAL(eventsLoaded(QVector<Event*> *)), SLOT(onEventsLoaded(QVector<Event*> *)));
+    database = new Database();
+    connect(database, SIGNAL(eventsLoaded(QVector<Event*> *)), SLOT(onEventsLoaded(QVector<Event*> *)));
 
-    setGeometry(30, 30, 1200, 600);
     createContent();
 }
 
 void MainWindow::closeEvent(QCloseEvent *e) {
     Q_UNUSED(e);
 
-    this->database->close();
-    this->close();
+    database->close();
+    close();
 }
 
 /* The general layout of the application is as follows:

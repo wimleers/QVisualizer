@@ -27,10 +27,6 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
     view->setRenderHints(QPainter::Antialiasing);
     view->show();
 
-    highlightedRect = scene->addRect(QRectF(0, 0, scene->width(), scene->height()),
-                                     QPen(QColor("red")),
-                                     QBrush(QColor(200, 30, 30, 50)));
-
     mainLayout = new QVBoxLayout();
     mainLayout->addLayout(timeValueLabelsLayout);
     mainLayout->addWidget(timeSlider);
@@ -49,10 +45,6 @@ void TimeLineVisualization::onTimeout() {
     emit timeSpanChanged(timeSlider->lowerValue(), timeSlider->upperValue());
     minTimeValueLabel->setText(msecsToString(timeSlider->lowerValue()));
     maxTimeValueLabel->setText(msecsToString(timeSlider->upperValue()));
-
-    int leftX = ((float) timeSlider->lowerValue() / maxEventTime) * scene->width();
-    int rightX = ((float) timeSlider->upperValue() / maxEventTime) * scene->width();
-    highlightedRect->setRect(leftX, 0, rightX - leftX, scene->height());
 }
 
 void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events) {
@@ -62,10 +54,30 @@ void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events
     blueBrush = new QBrush(Qt::blue);
     greenBrush = new QBrush(Qt::green);
 
+    QGraphicsItem *item;
+    foreach(item, scene->items()) {
+        scene->removeItem(item);
+    }
+
+    int leftX = ((float) timeSlider->lowerValue() / maxEventTime) * scene->width();
+    int rightX = ((float) timeSlider->upperValue() / maxEventTime) * scene->width();
+    highlightedRect = scene->addRect(leftX, 0, rightX - leftX, scene->height(),
+                                     QPen(QColor("red")),
+                                     QBrush(QColor(200, 30, 30, 50)));
+
+    QString axisLabels[] = {"Linkermuiskliks", "Rechtermuiskliks", "Dubbelmuiskliks", "Toetsenbordaanslagen"};
+    for(int i = 0; i < 4; ++i) {
+        scene->addLine(2, 33 + (i * 45), scene->width() - 2, 33 + (i * 45));
+        QGraphicsSimpleTextItem *label = new QGraphicsSimpleTextItem();
+        label->setText(axisLabels[i]);
+        label->setPos(4, 10 + (i * 45));
+        scene->addItem(label);
+    }
+
     foreach(event, *events) {
         QString eventType = event->getEventType();
-        if(eventType.compare("MouseButtonPress")   *
-           eventType.compare("MouseButtonRelease") *
+        if(eventType.compare("MouseButtonPress")    *
+           eventType.compare("MouseButtonRelease")  *
            eventType.compare("MouseButtonDblClick") *
            eventType.compare("KeyRelease") == 0) {
 
@@ -92,7 +104,7 @@ void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events
                 ((QGraphicsRectItem*)shape)->setRect(shapeX, 165, 5, 5);
             }
 
-            shape->setToolTip(QString("Time: ") + QString::number(event->getTime()) + "\n" +
+            shape->setToolTip(QString("Time: ") + msecsToString(event->getTime()) + "\n" +
                                       "Type: " + event->getEventType() + "\n" +
                                       "Target widget: " + event->getWidget() + "\n" +
                                       "Details: " + event->getDetails());
