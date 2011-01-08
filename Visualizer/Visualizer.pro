@@ -16,14 +16,16 @@ HEADERS += MainWindow.h \
            HeatMapVisualization.h \
            BarTreeVisualization.h \
            CustomQGraphicsEllipseItem.h \
-           CustomQGraphicsScene.h
+           CustomQGraphicsScene.h \
+           ClickLabel.h
 
 SOURCES += MainWindow.cpp \
            Database.cpp \
            Main.cpp \
            TimeLineVisualization.cpp \
            HeatMapVisualization.cpp \
-           BarTreeVisualization.cpp
+           BarTreeVisualization.cpp \
+           ClickLabel.cpp
 
 OTHER_FILES += sql.sql
 

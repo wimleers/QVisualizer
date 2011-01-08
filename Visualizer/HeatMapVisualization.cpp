@@ -10,12 +10,17 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     for (int i = 0; i < height; ++i)
         heatMap[i] = new int[width];
 
+    clickHeatMap = new int*[height];
+    for (int i = 0; i < height; ++i)
+        clickHeatMap[i] = new int[width];
+
     mouseRoute = new QVector<QPoint>();
 
     clearHeatMap();
 
     marge = 40;
     mouseRouteInterval = 1;
+    clickDeviation = 10;
 
     showLeftClicks = showRightClicks = showSingleClicks = showDoubleClicks = showMouseMoveRoute = true;
     showMouseMove = false;
@@ -25,12 +30,9 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
 
     image = new QImage(width, height, QImage::Format_RGB32);
 
-    //*pixmap = QPixmap::fromImage(*image);
-    //clickPixmap = new ClickPixmap(*pixmap);
-    //QObject::connect(clickPixmap, SIGNAL(mousePressed(QPoint)), this, SLOT(pixelSelected(QPoint)));
-
-    heatMapLabel = new QLabel();
+    heatMapLabel = new ClickLabel();
     heatMapLabel->setPixmap(QPixmap::fromImage(*image));
+    //connect(heatMapLabel, SIGNAL(clicked(QPoint)), this, SLOT(pixelSelected(QPoint)));
 
     QPushButton *showImageButton = new QPushButton("Afbeelding in oorspronkelijke grootte");
     connect(showImageButton, SIGNAL(clicked()), SLOT(showImage()));
@@ -80,6 +82,7 @@ void HeatMapVisualization::update(QVector<Event*> *events = NULL) {
                             clickOnHeatMap(x,y);
                         else if (showRightClicks && args.at(2).indexOf("R") != -1)
                             clickOnHeatMap(x,y);
+                        clickHeatMap[x][y]++;
                     }
                     if (showMouseMoveRoute && events->at(i)->getEventType().compare("MouseMove") == 0) { //muisbewegingen tekenen => gemiddeld punt berekenen per mouseRouteInterval bewegingen
                         if (counter < mouseRouteInterval) {
@@ -198,7 +201,20 @@ void HeatMapVisualization::highlightEventLocation(int msec) {
 }
 
 void HeatMapVisualization::pixelSelected(QPoint p) {
-    qDebug() << p.x() << "," << p.y();
+    int numClicks = 0;
+    for (int i = -clickDeviation; i <= clickDeviation && p.y() + i < height; ++i)
+        for (int j = -clickDeviation; j <= clickDeviation && p.x() + j < width; ++j)
+            if(p.x() + i > 0 && p.y() + j > 0)
+                numClicks += clickHeatMap[p.y() + i][p.x() + j];
+
+    QPainter painter;
+    painter.begin(image);
+    painter.setBrush(QBrush(QColor(0,0,0)));
+    painter.drawText(p, QString::number(numClicks));
+
+    painter.end();
+
+    imageClickLabel->setPixmap(QPixmap::fromImage(*image));
 }
 
 int HeatMapVisualization::max(int a, int b) {
@@ -211,6 +227,10 @@ void HeatMapVisualization::clearHeatMap() {
     for (int i = 0; i < height; ++i)
         for (int j = 0; j < width; ++j)
             heatMap[i][j] = 0;
+
+    for (int i = 0; i < height; ++i)
+        for (int j = 0; j < width; ++j)
+            clickHeatMap[i][j] = 0;
 
     mouseRoute->clear();
 }
@@ -256,12 +276,14 @@ void HeatMapVisualization::showImage() {
     dialog = new QDialog();
     QVBoxLayout *layout = new QVBoxLayout();
 
-    QLabel *imageLabel = new QLabel();
-    imageLabel->setPixmap(QPixmap::fromImage(*image));
+    imageClickLabel = new ClickLabel();
+    imageClickLabel->setPixmap(QPixmap::fromImage(*image));
+    connect(imageClickLabel, SIGNAL(clicked(QPoint)), this, SLOT(pixelSelected(QPoint)));
+
     QPushButton *okButton = new QPushButton("Ok");
     connect(okButton, SIGNAL(clicked()), this, SLOT(closeDialog()));
 
-    layout->addWidget(imageLabel, 0, Qt::AlignCenter);
+    layout->addWidget(imageClickLabel, 0, Qt::AlignCenter);
     layout->addWidget(okButton, 0, Qt::AlignCenter);
 
     dialog->setLayout(layout);
