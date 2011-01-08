@@ -87,8 +87,7 @@ void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events
 
         // Filter interesting events
         QString eventType = event->getEventType();
-        if(eventType.compare("MouseButtonPress")    *
-           eventType.compare("MouseButtonRelease")  *
+        if(eventType.compare("MouseButtonPress")  *
            eventType.compare("MouseButtonDblClick") *
            eventType.compare("KeyRelease") == 0) {
 
@@ -98,13 +97,21 @@ void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events
 
             if(eventType.compare("MouseButtonPress") == 0) {
                 shape = new CustomQGraphicsEllipseItem(event->getTime(), eventType);
-                shape->setBrush(*redBrush);
-                ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 30, 6, 6);
-            }
-            else if(eventType.compare("MouseButtonRelease") == 0) {
-                shape = new CustomQGraphicsEllipseItem(event->getTime(), eventType);
-                shape->setBrush(*blueBrush);
-                ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 75, 6, 6);
+                QString details = event->getDetails();
+                details.remove("\"");
+
+                QStringList args = details.split(";");
+                if(args.count() < 3)
+                    break;
+
+                if(args.at(2).indexOf("L") != -1) {
+                    shape->setBrush(*redBrush);
+                    ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 30, 6, 6);
+                }
+                else if(args.at(2).indexOf("R") != -1) {
+                    shape->setBrush(*blueBrush);
+                    ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 75, 6, 6);
+                }
             }
             else if(eventType.compare("MouseButtonDblClick") == 0) {
                 shape = new CustomQGraphicsEllipseItem(event->getTime(), eventType);
