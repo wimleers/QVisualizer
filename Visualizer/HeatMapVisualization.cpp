@@ -52,11 +52,11 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     mouseMoveCheckBox = new QCheckBox("&Muisbewegingen", this);
 
     leftClickCheckBox->setChecked(leftClick);
-    rightClickCheckBox->setCheck(rightClick);
-    mouseMoveRouteCheckBox->setCheck(mouseMoveRoute);
-    clickCheckBox->setCheck(click);
-    doubleClickCheckBox->setCheck(doubleClick);
-    mouseMoveCheckBox->setCheck(mouseMove);
+    rightClickCheckBox->setChecked(rightClick);
+    mouseMoveRouteCheckBox->setChecked(mouseMoveRoute);
+    clickCheckBox->setChecked(click);
+    doubleClickCheckBox->setChecked(doubleClick);
+    mouseMoveCheckBox->setChecked(mouseMove);
 
     connect(leftClickCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
     connect(rightClickCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
