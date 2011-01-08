@@ -23,7 +23,7 @@ void BarTreeVisualization::eventSequenceChanged(QVector<Event *> * events) {
 
 /**
  * Periodically (BARTREEVISUALIZATION_DATA_REFRESH_INTERVAL intervals) poll
- * to see if there's a new event sequence tod raw. We do this using polling
+ * to see if there's a new event sequence to draw. We do this using polling
  * to prevent continuous redrawing. The number of redrawings per second is
  * now effectively limited to 1/BARTREEVISUALIZATION_DATA_REFRESH_INTERVAL.
  */
@@ -171,7 +171,7 @@ void BarTreeVisualization::sendEventSequenceToWebView() {
         }
 
         tmp.clear();
-        tmp.insert("count",     inputTypeFrequency[keyL1] / totalL1);
+        tmp.insert("count",     inputTypeFrequency[keyL1]);
         tmp.insert("frequency", inputTypeFrequency[keyL1] / totalL1);
         tmp.insert("children", level2);
 

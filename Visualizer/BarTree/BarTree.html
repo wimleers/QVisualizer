@@ -7,9 +7,10 @@
           body {
             margin: 0;
             overflow: hidden;
-          }
+          }          
         </style>
         <script src="raphael.js"></script>
+        <script src="popup.js"></script>
         <script type="text/javascript">
           function BarTreeView(domID, width, height) {
             var self = this;
@@ -100,12 +101,14 @@
                   var color          = subTree[label].parentColor;
                   var parentBlocks   = subTree[label].parentBlocks;
                 }
+                var count = subTree[label].count;
                 var frequency = subTree[label].frequency;
 
                 // Generate the block object and push it into the current
                 // level's array of blocks.
                 block = {
                   'label'          : label,
+                  'count'          : count,
                   'frequency'      : frequency,
                   'finalFrequency' : finalFrequency,
                   'color'          : color,
@@ -117,19 +120,22 @@
                 // recursive call, in the nextSubTree variable.
                 if (subTree[label].children !== undefined) {
                   for (child in subTree[label].children) {
+                    var countOfChildBlock          = subTree[label].children[child].count;
+                    var frequencyOfChildBlock      = subTree[label].children[child].frequency;
                     // Final frequency of child block = final frequency of
                     // current block times frequency of frequency of child
                     // block.
-                    var frequencyOfChildBlock      = subTree[label].children[child].frequency;
                     var finalFrequencyOfChildBlock = finalFrequency * frequencyOfChildBlock;
 
                     // If this child does not yet exist in nextSubTree, create
                     // it.
                     if (nextSubTree[child] == undefined) {
                       nextSubTree[child] = {};
+                      nextSubTree[child].count          = countOfChildBlock;
                       nextSubTree[child].frequency      = frequencyOfChildBlock;
                       nextSubTree[child].finalFrequency = finalFrequencyOfChildBlock;
                       var parentBlock = {
+                        'count'     : countOfChildBlock,
                         'frequency' : frequencyOfChildBlock,
                         'block'     : block
                       };
@@ -145,6 +151,7 @@
                     else {
                       nextSubTree[child].finalFrequency += finalFrequencyOfChildBlock;
                       var parentBlock = {
+                        'count'     : countOfChildBlock,
                         'frequency' : frequencyOfChildBlock,
                         'block'     : block
                       };
@@ -246,6 +253,39 @@
                                                  .attr(self.blockAttributes(currentBlock.color));
                   currentBlock.drawnLabel = self.paper.text(xOffset + self.barWidth / 2, yOffset + barHeight / 2, currentBlock.label)
                                                       .attr(self.fontAttributes);
+                  currentBlock.drawnLabel.block = self.levels[l].blocks[b];
+                  
+
+                  currentBlock.drawnLabel.hover(function(event, a) {
+                    var popupX = this.attr('x');
+                    var popupY = this.attr('y');
+                    if (popupY < 100) {
+                      var pos = 'bottom';
+                      popupY += 15;
+                    }
+                    else {
+                      var pos = 'top';
+                      popupY -= 15;
+                    }
+
+                    r = self.paper;
+                    self.label = r.set();
+                    self.label.push(r.text(20, 12, "" + this.block.count + " occurrences").attr({font: '16px Helvetica, Arial', 'font-weight' : 800, fill: "#fff"}));
+                    self.label.push(r.text(20, 27, "relative frequency: " + (Math.round(this.block.frequency * 1000) / 10) + "%").attr({font: '14px Helvetica, Arial', 'font-weight': 800, fill: "#fff"}).attr({fill: "hsb(" + [.4, .5, 1] + ")"}));
+                    self.label.push(r.text(20, 42, "absolute frequency: " + (Math.round(this.block.finalFrequency * 1000) / 10) + "%").attr({font: '14px Helvetica, Arial', 'font-weight': 800, fill: "#fff"}).attr({fill: "hsb(" + [.4, .5, 1] + ")"}));
+                    self.label.hide();
+                    self.frame = self.paper.popup(popupX, popupY, self.label, pos).attr({fill: "#000", stroke: "#666", "stroke-width": 2, "fill-opacity": .85}).show();
+                    self.label[0].show();
+                    self.label[1].show();
+                    self.label[2].show();
+                  }, function (event) {
+                    self.frame.hide();
+                    self.label[0].hide();
+                    self.label[1].hide();
+                    self.label[2].hide();
+                    delete self.frame;
+                    delete self.label;
+                  });
 
                   // Draw connection between this block and its parent blocks
                   // in the previous (higher) level.
@@ -268,6 +308,22 @@
                   yOffset += barHeight + verticalSpacing;
                 }
               }
+              // 
+              // 
+              // var pointedLabel = self.levels[0].blocks[0].drawnLabel;
+              // var popupX = pointedLabel.attr('x');
+              // var popupY = pointedLabel.attr('y') - 15;
+              // 
+              // r = self.paper;
+              // self.label = r.set();
+              // self.label.push(r.text(60, 12, "24 occurrences").attr({font: '16px Helvetica, Arial', fill: "#fff"}));
+              // self.label.push(r.text(60, 27, "74%").attr({font: '14px Helvetica, Arial', 'font-weight': 800, fill: "#fff"}).attr({fill: "hsb(" + [.6, .5, 1] + ")"}));
+              // self.label.hide();
+              // var frame = self.paper.popup(popupX, popupY, self.label, "top").attr({fill: "#000", stroke: "#666", "stroke-width": 2, "fill-opacity": .7}).show();
+              // self.label[0].show();
+              // self.label[1].show();
+              
+              
             };
 
             self.drawConnector = function(leftTopX, leftTopY, rightTopX, rightTopY, height, params) {
@@ -296,33 +352,38 @@
 
           var data = {
             'mouse' : {
+              'count' : 30,
               'color' : '#428496',
               'frequency' : 0.8,
               'children'  : {
                 'left' : {
+                  'count' : 21,
                   'frequency' : 0.7,
                   'children'  : {
-                    'none'  : { 'frequency' : 0.8 },
-                    'CTRL'  : { 'frequency' : 0.1 },
-                    'other' : { 'frequency' : 0.1 }
+                    'none'  : { 'count' : 17, 'frequency' : 0.8 },
+                    'CTRL'  : { 'count' : 2, 'frequency' : 0.1 },
+                    'other' : { 'count' : 2, 'frequency' : 0.1 }
                   }
                 },
                 'dbl left' : {
+                  'count' : 3, 
                   'frequency' : 0.1,
                   'children'  : {
-                    'none' : { 'frequency' : 1.0 }
+                    'none' : { 'count' : 3, 'frequency' : 1.0 }
                   }
                 },
                 'right' : {
+                  'count' : 3, 
                   'frequency' : 0.1,
                   'children'  : {
-                    'none' : { 'frequency' : 1.0 }
+                    'none' : { 'count' : 3, 'frequency' : 1.0 }
                   }
                 },
                 'other' : {
+                  'count' : 3, 
                   'frequency' : 0.1,
                   'children'  : {
-                    'none' : { 'frequency' : 1.0 }
+                    'none' : { 'count' : 3, 'frequency' : 1.0 }
                   }
                 }
               }

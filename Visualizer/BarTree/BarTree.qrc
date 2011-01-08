@@ -2,5 +2,6 @@
     <qresource prefix="/BarTree">
         <file>BarTree.html</file>
         <file>raphael.js</file>
+        <file>popup.js</file>
     </qresource>
 </RCC>
