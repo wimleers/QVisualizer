@@ -20,12 +20,12 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
     timeValueLabelsLayout->addWidget(minTimeValueLabel, 0, Qt::AlignLeft);
     timeValueLabelsLayout->addWidget(maxTimeValueLabel, 0, Qt::AlignRight);
 
-    scene = new QGraphicsScene();
+    scene = new CustomQGraphicsScene();
+    connect(scene, SIGNAL(eventShapeClicked(int)), SIGNAL(onEventShapeClicked(int)));
     view = new QGraphicsView(scene);
     view->setGeometry(0, 0, 570, 200);
     scene->setSceneRect(view->geometry());
     view->setRenderHints(QPainter::Antialiasing);
-    //view->show();
 
     mainLayout = new QVBoxLayout();
     mainLayout->addLayout(timeValueLabelsLayout);
@@ -92,26 +92,27 @@ void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events
            eventType.compare("MouseButtonDblClick") *
            eventType.compare("KeyRelease") == 0) {
 
+            // Create a shape for each event and fill it with a different color for each event type
             QAbstractGraphicsShapeItem *shape;
             int shapeX = (((float) event->getTime() / maxEventTime) * scene->width()) - 3;
 
             if(eventType.compare("MouseButtonPress") == 0) {
-                shape = new QGraphicsEllipseItem(0, scene);
+                shape = new CustomQGraphicsEllipseItem(event->getTime());
                 shape->setBrush(*redBrush);
                 ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 30, 6, 6);
             }
             else if(eventType.compare("MouseButtonRelease") == 0) {
-                shape = new QGraphicsEllipseItem(0, scene);
+                shape = new CustomQGraphicsEllipseItem(event->getTime());
                 shape->setBrush(*blueBrush);
                 ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 75, 6, 6);
             }
             else if(eventType.compare("MouseButtonDblClick") == 0) {
-                shape = new QGraphicsEllipseItem(0, scene);
+                shape = new CustomQGraphicsEllipseItem(event->getTime());
                 shape->setBrush(*greenBrush);
                 ((QGraphicsEllipseItem*)shape)->setRect(shapeX, 120, 6, 6);
             }
             else if(eventType.compare("KeyRelease") == 0) {
-                shape = new QGraphicsRectItem(0, scene);
+                shape = new QGraphicsRectItem();
                 ((QGraphicsRectItem*)shape)->setRect(shapeX, 165, 5, 5);
             }
 
@@ -119,9 +120,11 @@ void TimeLineVisualization::eventsSequenceChanged(const QVector<Event *> *events
                                       "Type: " + event->getEventType() + "\n" +
                                       "Target widget: " + event->getWidget() + "\n" +
                                       "Details: " + event->getDetails());
+            scene->addItem(shape);
         }
     }
 }
+
 
 /* Converts an integer that represents an amount of millliseconds to a better
  * understandable format. E.g.: 1234(ms) to "1.234s" and 71600(ms) to "1m11.6s".

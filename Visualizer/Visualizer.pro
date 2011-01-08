@@ -14,7 +14,9 @@ HEADERS += MainWindow.h \
            TimeLineVisualization.h \
            Event.h \
            HeatMapVisualization.h \
-           BarTreeVisualization.h
+           BarTreeVisualization.h \
+           CustomQGraphicsEllipseItem.h \
+    CustomQGraphicsScene.h
 
 SOURCES += MainWindow.cpp \
            Database.cpp \
@@ -35,13 +37,13 @@ macx {
 }
 
 # Copy all OTHER_FILES to the build directory when using shadow builds.
-!equals($${PWD}, $${OUT_PWD}) {
-    unix:COPY  = cp
-    win32:COPY = copy /y
-    for(other_file, OTHER_FILES) {
-          QMAKE_PRE_LINK += $${COPY} $${PWD}/$${other_file} $${OUT_PWD}/$${other_file};
-    }
-    win32 {
-        replace(QMAKE_PRE_LINK, /, \\)
-    }
-}
+#!equals($${PWD}, $${OUT_PWD}) {
+#    unix:COPY  = cp
+#    win32:COPY = copy /y
+#    for(other_file, OTHER_FILES) {
+#          QMAKE_PRE_LINK += $${COPY} $${PWD}/$${other_file} $${OUT_PWD}/$${other_file};
+#    }
+#    win32 {
+#        replace(QMAKE_PRE_LINK, /, \\)
+#    }
+#}

@@ -26,6 +26,7 @@ void MainWindow::createContent() {
 
     timeLineVis = new TimeLineVisualization(database);
     connect(timeLineVis, SIGNAL(timeSpanChanged(int, int)), database, SLOT(loadEvents(int, int)));
+    connect(timeLineVis, SIGNAL(onEventShapeClicked(int)), heatMapVis, SLOT(highlightEventLocation(int)));
 
     barTreeVis = new BarTreeVisualization();
 

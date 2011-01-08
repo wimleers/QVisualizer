@@ -4,13 +4,15 @@
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QTimer>
-#include <QGraphicsScene>
+//#include <QGraphicsScene>
+#include "CustomQGraphicsEllipseItem.h"
 #include <QGraphicsView>
-#include <QGraphicsProxyWidget>
 #include <QLabel>
 #include <QxtSpanSlider>
 
 #include "Database.h"
+#include "CustomQGraphicsScene.h"
+#include "CustomQGraphicsEllipseItem.h"
 
 class TimeLineVisualization : public QWidget {
     Q_OBJECT
@@ -24,7 +26,7 @@ class TimeLineVisualization : public QWidget {
         QVBoxLayout *mainLayout;
         QHBoxLayout *timeValueLabelsLayout;
 
-        QGraphicsScene *scene;
+        CustomQGraphicsScene *scene;
         QGraphicsView *view;
         QGraphicsRectItem *highlightedRect;
         QBrush *redBrush, *blueBrush, *greenBrush;
@@ -39,6 +41,7 @@ class TimeLineVisualization : public QWidget {
 
     signals:
         void timeSpanChanged(int, int);
+        void onEventShapeClicked(int);
 
     private slots:
         void onTimeout();

@@ -6,7 +6,6 @@
 #include "HeatMapVisualization.h"
 #include "BarTreeVisualization.h"
 
-
 #include <QMainWindow>
 #include <QGridLayout>
 #include <QLabel>
