@@ -24,7 +24,7 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     mouseMoveRoute = true;
     click = true;
     doubleClick = true;
-    mouseMove = true;
+    mouseMove = false;
 
     screenWidth = 500;
     screenHeight = 300;
@@ -32,10 +32,6 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     image = new QImage(width, height, QImage::Format_RGB32);
 
     heatMapLabel = new QLabel();
-    /*heatMapLabel->setMinimumWidth(screenWidth);
-    heatMapLabel->setMaximumWidth(screenWidth);
-    heatMapLabel->setMinimumHeight(screenHeight);
-    heatMapLabel->setMaximumHeight(screenHeight);*/
     heatMapLabel->setPixmap(QPixmap::fromImage(*image));
     QPushButton *showImageButton = new QPushButton("Afbeelding in oorspronkelijke grootte");
     connect(showImageButton, SIGNAL(clicked()), this, SLOT(showImage()));
@@ -55,12 +51,12 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     doubleClickCheckBox = new QCheckBox("&Dubbel muisklik", this);
     mouseMoveCheckBox = new QCheckBox("&Muisbewegingen", this);
 
-    leftClickCheckBox->setCheckState(Qt::Checked);
-    rightClickCheckBox->setCheckState(Qt::Checked);
-    mouseMoveRouteCheckBox->setCheckState(Qt::Checked);
-    clickCheckBox->setCheckState(Qt::Checked);
-    doubleClickCheckBox->setCheckState(Qt::Checked);
-    mouseMoveCheckBox->setCheckState(Qt::Checked);
+    leftClickCheckBox->setChecked(leftClick);
+    rightClickCheckBox->setCheck(rightClick);
+    mouseMoveRouteCheckBox->setCheck(mouseMoveRoute);
+    clickCheckBox->setCheck(click);
+    doubleClickCheckBox->setCheck(doubleClick);
+    mouseMoveCheckBox->setCheck(mouseMove);
 
     connect(leftClickCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
     connect(rightClickCheckBox, SIGNAL(stateChanged(int)), this, SLOT(updateParameters(int)));
