@@ -7,7 +7,8 @@ int main(int argc, char *argv[]) {
 
     QApplication app(argc, argv);
 
-    MainWindow mainWindow;
+    bool import = (argc > 1);
+    MainWindow mainWindow(import);
     mainWindow.showMaximized();
 
     return app.exec();

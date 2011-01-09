@@ -1,6 +1,6 @@
 #include "Database.h"
 
-Database::Database() : QObject() {
+Database::Database(bool import) : QObject() {
     QProcess p;
     this->csvFile = "events.csv";
     this->csvFileForSQLite = "events-prepared-for-sqlite.csv";
@@ -35,37 +35,39 @@ Database::Database() : QObject() {
         // Third line: column headers.
         in.readLine();
 
-        // Write all remaining lines to csvFileForSQLite.
-        QFile csvForSQLite(this->csvFileForSQLite);
-        if (!csvForSQLite.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
-            qCritical("Could not open '%s' file for reading: %s.", qPrintable(this->csvFileForSQLite), qPrintable(csvForSQLite.errorString()));
-            exit(1);
-        }
-        else {
-            QTextStream out(&csvForSQLite);
-            while (!in.atEnd()) {
-                out << in.readLine() << endl;
+        if (import) {
+            // Write all remaining lines to csvFileForSQLite.
+            QFile csvForSQLite(this->csvFileForSQLite);
+            if (!csvForSQLite.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text)) {
+                qCritical("Could not open '%s' file for reading: %s.", qPrintable(this->csvFileForSQLite), qPrintable(csvForSQLite.errorString()));
+                exit(1);
             }
-        }
-    }
+            else {
+                QTextStream out(&csvForSQLite);
+                while (!in.atEnd()) {
+                    out << in.readLine() << endl;
+                }
+            }
 
-    // Create the SQLite DB.
-    /*static QString command = "sqlite3 db.sqlite < sql.sql && sqlite3 db.sqlite";
+            // Create the SQLite DB.
+            static QString command = "sqlite3 db.sqlite < sql.sql && sqlite3 db.sqlite";
 #ifdef Q_OS_WIN32
-    p.start(QString("cmd.exe /c %1").arg(command));
+            p.start(QString("cmd.exe /c %1").arg(command));
 #else
-    p.start(QString("sh -c \"%1\"").arg(command));
+            p.start(QString("sh -c \"%1\"").arg(command));
 #endif
 
-    // Import the csvFileForSQLite into the SQLite DB.
-    if (p.waitForStarted(500)) {
-        p.write(".separator ','\r\n");
-        p.write(qPrintable(QString(".import %1 Events\r\n").arg(this->csvFileForSQLite)));
-        p.waitForFinished(1000);
+            // Import the csvFileForSQLite into the SQLite DB.
+            if (p.waitForStarted(500)) {
+                p.write(".separator ','\r\n");
+                p.write(qPrintable(QString(".import %1 Events\r\n").arg(this->csvFileForSQLite)));
+                p.waitForFinished(1000);
+            }
+            else
+               qDebug() << "Failed to import recorded events into SQLite database.";
+            p.close();
+        }
     }
-    else
-       qDebug() << "Failed to import recorded events into SQLite database.";
-    p.close();*/
 
     this->db = QSqlDatabase::addDatabase("QSQLITE");
     this->db.setDatabaseName("./db.sqlite");
@@ -73,7 +75,6 @@ Database::Database() : QObject() {
         qDebug() << "Database connection could not be established: " << this->db.lastError().text();
         exit(1);
     }
-
 
     this->filteredEvents = new QVector<Event*>();
 }

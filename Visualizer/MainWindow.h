@@ -27,7 +27,7 @@ class MainWindow : public QMainWindow {
         void createContent();
 
     public:
-        MainWindow(QWidget *parent = 0);
+        MainWindow(bool import, QWidget *parent = 0);
         ~MainWindow() {}
 
     public slots:

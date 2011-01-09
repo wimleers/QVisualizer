@@ -32,7 +32,7 @@ class Database : public QObject {
         QVector<Event*> *filteredEvents;
 
     public:
-        Database();
+        Database(bool import = false);
         ~Database();
 
         int getMinEventTime();

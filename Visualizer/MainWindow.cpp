@@ -1,7 +1,7 @@
 #include "MainWindow.h"
 
-MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-    database = new Database();
+MainWindow::MainWindow(bool import, QWidget *parent) : QMainWindow(parent) {
+    database = new Database(import);
     connect(database, SIGNAL(eventsLoaded(QVector<Event*> *)), SLOT(onEventsLoaded(QVector<Event*> *)));
 
     createContent();
