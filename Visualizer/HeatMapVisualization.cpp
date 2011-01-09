@@ -18,17 +18,17 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
 
     clearHeatMap();
 
-    marge = 40;
+    marge = 20;
     mouseRouteInterval = 1;
     clickDeviation = 10;
 
     showLeftClicks = showRightClicks = showSingleClicks = showDoubleClicks = showMouseMoveRoute = true;
     showMouseMove = false;
 
-    screenWidth = 500;
-    screenHeight = 300;
+    screenWidth = (QApplication::desktop()->width() >= 1920) ? 1050: 470;
+    screenHeight = (QApplication::desktop()->width() > 800) ? 500 : 300;
 
-    image = new QImage(width, height, QImage::Format_RGB32);
+    image = new QImage(width, height, QImage::Format_ARGB32_Premultiplied);
 
     //heatMapLabel = new ClickLabel();
     //heatMapLabel->setPixmap(QPixmap::fromImage(*image));
@@ -37,7 +37,7 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     scene = new HeatMapVisQGraphicsScene();
     view = new QGraphicsView(scene);
     view->setRenderHints(QPainter::Antialiasing);
-    scene->setSceneRect(0, 0, (QApplication::desktop()->width() == 1920) ? 1050: 470, 300);
+    scene->setSceneRect(0, 0, screenWidth, screenHeight);
 
     QPushButton *showImageButton = new QPushButton("Afbeelding in oorspronkelijke grootte");
     connect(showImageButton, SIGNAL(clicked()), SLOT(showImage()));
@@ -167,11 +167,14 @@ void HeatMapVisualization::renderVisualization() {
                 //qDebug() << "color " << h << v << s;
             }
             color.setHsv(h,v,s);
-            color.setAlpha(127);
+            color.setAlpha(0);
             image->setPixel(j, i, color.rgb());
         }
     }
+    color.setHsv(255, 0, 255);
+    image->createMaskFromColor(color.rgb(), Qt::MaskOutColor);
 
+    //muisbewigingen tekenen
     QPainter painter;
     painter.begin(image);
     for(int i = 0; i + 1 < mouseRoute->size(); ++i){
@@ -181,9 +184,9 @@ void HeatMapVisualization::renderVisualization() {
     }
     painter.end();
 
-    QImage scaledImage = image->scaled(QSize(screenWidth,screenHeight), Qt::KeepAspectRatio);
+    scaledImage = image->scaled(QSize(screenWidth,screenHeight), Qt::KeepAspectRatio);
     scene->addPixmap(*(determineBackgroundImage(lastEventTime)));
-    scene->addPixmap(/*heatMapLabel->setPixmap(*/QPixmap::fromImage(scaledImage));
+    scene->addPixmap(QPixmap::fromImage(scaledImage));
 }
 
 void HeatMapVisualization::highlightEventLocation(int msec) {
@@ -204,9 +207,9 @@ void HeatMapVisualization::highlightEventLocation(int msec) {
                 painter.end();
             }
         }
-    QImage scaledImage = image->scaled(QSize(screenWidth,screenHeight),Qt::KeepAspectRatio);
+    scaledImage = image->scaled(QSize(screenWidth,screenHeight),Qt::KeepAspectRatio);
     scene->addPixmap(*(determineBackgroundImage(lastEventTime)));
-    scene->addPixmap(/*heatMapLabel->setPixmap(*/QPixmap::fromImage(scaledImage));
+    scene->addPixmap(QPixmap::fromImage(scaledImage));
 }
 
 void HeatMapVisualization::pixelSelected(QPoint p) {
@@ -218,9 +221,7 @@ void HeatMapVisualization::pixelSelected(QPoint p) {
 
     QPainter painter;
     painter.begin(image);
-    painter.setBrush(QBrush(QColor(0,0,0)));
     painter.drawText(p, QString::number(numClicks));
-
     painter.end();
 
     imageClickLabel->setPixmap(QPixmap::fromImage(*image));

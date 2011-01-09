@@ -30,6 +30,7 @@ class HeatMapVisualization : public QWidget {
         QVBoxLayout *mainLayout;
         QImage* image;
         ClickLabel /**heatMapLabel, */*imageClickLabel;
+        QImage scaledImage;
 
         HeatMapVisQGraphicsScene *scene;
         QGraphicsView *view;
