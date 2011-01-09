@@ -23,9 +23,10 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
     scene = new CustomQGraphicsScene();
     connect(scene, SIGNAL(eventShapeClicked(int, const QString &)), SIGNAL(onEventShapeClicked(int, const QString &)));
     view = new QGraphicsView(scene);
-    view->setGeometry(0, 0, 570, 200);
-    scene->setSceneRect(view->geometry());
+    //view->setGeometry(0, 0, 570, 200);
+    //scene->setSceneRect(view->geometry());
     view->setRenderHints(QPainter::Antialiasing);
+    scene->setSceneRect(0, 0, (QApplication::desktop()->width() == 1920) ? 1050: 570, 200);
 
     mainLayout = new QVBoxLayout();
     mainLayout->addLayout(timeValueLabelsLayout);

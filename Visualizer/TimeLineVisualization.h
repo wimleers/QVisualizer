@@ -1,11 +1,11 @@
 #ifndef TIMELINEVISUALIZATION_H_
 #define TIMELINEVISUALIZATION_H_
 
+#include <QApplication>
+#include <QDesktopWidget>
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QTimer>
-//#include <QGraphicsScene>
-#include "CustomQGraphicsEllipseItem.h"
 #include <QGraphicsView>
 #include <QLabel>
 #include <QxtSpanSlider>
