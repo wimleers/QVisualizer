@@ -10,7 +10,7 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
 
     timer = new QTimer();
     timer->setSingleShot(true);
-    timer->setInterval(15);
+    timer->setInterval(500);
     connect(timeSlider, SIGNAL(spanChanged(int, int)), timer, SLOT(start()));
     connect(timer, SIGNAL(timeout()), SLOT(onTimeout()));
 
@@ -34,7 +34,8 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
     mainLayout->addWidget(view);
 
     setMinimumWidth(600);
-    setMaximumWidth(600);
+    if (QApplication::desktop()->width() < 1920)
+        setMaximumWidth(600);
     setMinimumHeight(300);
     setMaximumHeight(300);
 
