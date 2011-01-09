@@ -20,7 +20,7 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
     timeValueLabelsLayout->addWidget(minTimeValueLabel, 0, Qt::AlignLeft);
     timeValueLabelsLayout->addWidget(maxTimeValueLabel, 0, Qt::AlignRight);
 
-    scene = new CustomQGraphicsScene();
+    scene = new TimeLineVisQGraphicsScene();
     connect(scene, SIGNAL(eventShapeClicked(int, const QString &)), SIGNAL(onEventShapeClicked(int, const QString &)));
     view = new QGraphicsView(scene);
     //view->setGeometry(0, 0, 570, 200);

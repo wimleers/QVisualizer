@@ -11,7 +11,7 @@
 #include <QxtSpanSlider>
 
 #include "Database.h"
-#include "CustomQGraphicsScene.h"
+#include "TimeLineVisQGraphicsScene.h"
 #include "CustomQGraphicsEllipseItem.h"
 
 class TimeLineVisualization : public QWidget {
@@ -26,7 +26,7 @@ class TimeLineVisualization : public QWidget {
         QVBoxLayout *mainLayout;
         QHBoxLayout *timeValueLabelsLayout;
 
-        CustomQGraphicsScene *scene;
+        TimeLineVisQGraphicsScene *scene;
         QGraphicsView *view;
         QGraphicsRectItem *highlightedRect;
         QBrush *redBrush, *blueBrush, *greenBrush;

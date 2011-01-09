@@ -12,9 +12,14 @@
 #include <QPicture>
 #include <QPushButton>
 #include <QDialog>
+#include <QFile>
+#include <QGraphicsView>
+#include <QApplication>
+#include <QDesktopWidget>
 
 #include "Event.h"
 #include "ClickLabel.h"
+#include "HeatMapVisQGraphicsScene.h"
 
 class HeatMapVisualization : public QWidget {
     Q_OBJECT
@@ -23,7 +28,10 @@ class HeatMapVisualization : public QWidget {
         QDialog * dialog;
         QVBoxLayout *mainLayout;
         QImage* image;
-        ClickLabel *heatMapLabel, *imageClickLabel;
+        ClickLabel /**heatMapLabel, */*imageClickLabel;
+
+        HeatMapVisQGraphicsScene *scene;
+        QGraphicsView *view;
 
         QCheckBox *showLeftClicksCheckBox, *showRightClicksCheckBox;
         QCheckBox *showSingleClicksCheckBox, *showDoubleClicksCheckBox;
@@ -39,6 +47,7 @@ class HeatMapVisualization : public QWidget {
 
         int maxClicks;
         int marge, mouseRouteInterval, clickDeviation;
+        int lastEventTime;
 
         bool showLeftClicks, showRightClicks, showSingleClicks, showDoubleClicks, showMouseMove, showMouseMoveRoute;
 
@@ -53,6 +62,9 @@ class HeatMapVisualization : public QWidget {
 
         void update(QVector<Event*> *events);
         void renderVisualization();
+
+    private:
+        QPixmap* determineBackgroundImage(int msecs);
 
     private slots:
         void updateParameters(int state);

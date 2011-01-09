@@ -1,5 +1,5 @@
-#ifndef CUSTOMQGRAPHICSSCENE_H
-#define CUSTOMQGRAPHICSSCENE_H
+#ifndef TIMELINEVISQGRAPHICSSCENE_H
+#define TIMELINEVISQGRAPHICSSCENE_H
 
 #include <QGraphicsScene>
 #include <QGraphicsSceneMouseEvent>
@@ -7,11 +7,11 @@
 
 #include "CustomQGraphicsEllipseItem.h"
 
-class CustomQGraphicsScene: public QGraphicsScene {
+class TimeLineVisQGraphicsScene: public QGraphicsScene {
     Q_OBJECT
 
     public:
-        CustomQGraphicsScene() : QGraphicsScene() {}
+        TimeLineVisQGraphicsScene() : QGraphicsScene() {}
 
         void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) {
             CustomQGraphicsEllipseItem* clickedShape = (CustomQGraphicsEllipseItem*) itemAt(mouseEvent->scenePos().x(), mouseEvent->scenePos().y());

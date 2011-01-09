@@ -30,15 +30,20 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
 
     image = new QImage(width, height, QImage::Format_RGB32);
 
-    heatMapLabel = new ClickLabel();
-    heatMapLabel->setPixmap(QPixmap::fromImage(*image));
+    //heatMapLabel = new ClickLabel();
+    //heatMapLabel->setPixmap(QPixmap::fromImage(*image));
     //connect(heatMapLabel, SIGNAL(clicked(QPoint)), this, SLOT(pixelSelected(QPoint)));
+
+    scene = new HeatMapVisQGraphicsScene();
+    view = new QGraphicsView(scene);
+    view->setRenderHints(QPainter::Antialiasing);
+    scene->setSceneRect(0, 0, (QApplication::desktop()->width() == 1920) ? 1050: 470, 300);
 
     QPushButton *showImageButton = new QPushButton("Afbeelding in oorspronkelijke grootte");
     connect(showImageButton, SIGNAL(clicked()), SLOT(showImage()));
 
     mainLayout = new QVBoxLayout();
-    mainLayout->addWidget(heatMapLabel, 0, Qt::AlignCenter);
+    mainLayout->addWidget(view/*heatMapLabel*/, 0, Qt::AlignCenter);
     mainLayout->addWidget(showImageButton, 0, Qt::AlignCenter);
 
     createCheckBoxes();
@@ -57,6 +62,9 @@ void HeatMapVisualization::update(QVector<Event*> *events = NULL) {
         events = lastEvents;
     else
         return;
+
+    lastEventTime = events->last()->getTime();
+
     int counter = 0, mouseRouteX = 0, mouseRouteY = 0;
     for(int i = 0; i < events->count(); ++i) {
         if((showSingleClicks && events->at(i)->getEventType().compare("MouseButtonPress") == 0) ||
@@ -173,9 +181,9 @@ void HeatMapVisualization::renderVisualization() {
     }
     painter.end();
 
-    QImage scaledImage = image->scaled(QSize(screenWidth,screenHeight),Qt::KeepAspectRatio);
-    heatMapLabel->setPixmap(QPixmap::fromImage(scaledImage));
-
+    QImage scaledImage = image->scaled(QSize(screenWidth,screenHeight), Qt::KeepAspectRatio);
+    scene->addPixmap(*(determineBackgroundImage(lastEventTime)));
+    scene->addPixmap(/*heatMapLabel->setPixmap(*/QPixmap::fromImage(scaledImage));
 }
 
 void HeatMapVisualization::highlightEventLocation(int msec) {
@@ -197,7 +205,8 @@ void HeatMapVisualization::highlightEventLocation(int msec) {
             }
         }
     QImage scaledImage = image->scaled(QSize(screenWidth,screenHeight),Qt::KeepAspectRatio);
-    heatMapLabel->setPixmap(QPixmap::fromImage(scaledImage));
+    scene->addPixmap(*(determineBackgroundImage(lastEventTime)));
+    scene->addPixmap(/*heatMapLabel->setPixmap(*/QPixmap::fromImage(scaledImage));
 }
 
 void HeatMapVisualization::pixelSelected(QPoint p) {
@@ -278,10 +287,10 @@ void HeatMapVisualization::showImage() {
 
     imageClickLabel = new ClickLabel();
     imageClickLabel->setPixmap(QPixmap::fromImage(*image));
-    connect(imageClickLabel, SIGNAL(clicked(QPoint)), this, SLOT(pixelSelected(QPoint)));
+    connect(imageClickLabel, SIGNAL(clicked(QPoint)), SLOT(pixelSelected(QPoint)));
 
     QPushButton *okButton = new QPushButton("Ok");
-    connect(okButton, SIGNAL(clicked()), this, SLOT(closeDialog()));
+    connect(okButton, SIGNAL(clicked()), SLOT(closeDialog()));
 
     layout->addWidget(imageClickLabel, 0, Qt::AlignCenter);
     layout->addWidget(okButton, 0, Qt::AlignCenter);
@@ -349,10 +358,14 @@ void HeatMapVisualization::createCheckBoxes() {
 
     QGroupBox *box4 = new QGroupBox();
     QVBoxLayout *vbox4 = new QVBoxLayout();
-    vbox4->addWidget(margeLabel);
-    vbox4->addWidget(margeSpinBox);
-    vbox4->addWidget(mouseRouteIntervalLabel);
-    vbox4->addWidget(mouseRouteIntervalSpinBox);
+    QHBoxLayout *hbox4_1 = new QHBoxLayout();
+    hbox4_1->addWidget(margeLabel);
+    hbox4_1->addWidget(margeSpinBox);
+    QHBoxLayout *hbox4_2 = new QHBoxLayout();
+    hbox4_2->addWidget(mouseRouteIntervalLabel);
+    hbox4_2->addWidget(mouseRouteIntervalSpinBox);
+    vbox4->addLayout(hbox4_1);
+    vbox4->addLayout(hbox4_2);
     box4->setLayout(vbox4);
 
     QHBoxLayout *inputLayout = new QHBoxLayout();
@@ -361,6 +374,12 @@ void HeatMapVisualization::createCheckBoxes() {
     inputLayout->addWidget(box3);
     inputLayout->addWidget(box4);
 
-
     mainLayout->addLayout(inputLayout);
+}
+
+QPixmap* HeatMapVisualization::determineBackgroundImage(int msecs) {
+    while(msecs > 0 && !QFile::exists("./screenshots/" + QString::number(msecs) + ".png"))
+        --msecs;
+
+    return (msecs == 0) ? new QPixmap() : new QPixmap("./screenshots/" + QString::number(msecs) + ".png");
 }
