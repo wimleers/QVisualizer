@@ -109,16 +109,16 @@ void BarTreeVisualization::sendEventSequenceToWebView() {
             else if (key >= 16777234) {
                 switch (key) {
                 case 16777234:
-                    detailsList[1] = QString("arrow left");
+                    detailsList[1] = QString::fromUtf8("←");
                     break;
                 case 16777235:
-                    detailsList[1] = QString("arrow up");
+                    detailsList[1] = QString::fromUtf8("↑");
                     break;
                 case 16777236:
-                    detailsList[1] = QString("arrow right");
+                    detailsList[1] = QString::fromUtf8("→");
                     break;
                 case 16777237:
-                    detailsList[1] = QString("arrow down");
+                    detailsList[1] = QString::fromUtf8("↓");
                     break;
                 default:
                     break;
