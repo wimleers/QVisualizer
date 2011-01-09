@@ -68,6 +68,15 @@ void BarTreeVisualization::sendEventSequenceToWebView() {
         eventType = event->getEventType();
         details = event->getDetails();
 
+        if (eventType.contains("Mouse"))
+            inputType = QString("Mouse");
+        else
+            inputType = QString("Keyboard");
+
+        // Ignore MouseButtonRelease events.
+        if (eventType.compare(QString("MouseButtonRelease")) == 0)
+            continue;
+
         // Clean up event type for optimized display.
         eventType.replace("Key", "");
         eventType.replace("Mouse", "");
@@ -75,22 +84,15 @@ void BarTreeVisualization::sendEventSequenceToWebView() {
         eventType.replace("Release", "Press");
         // Mouse.
         eventType.replace("ButtonPress", "Click");
-        eventType.replace("ButtonRelease", "Click");
         eventType.replace("ButtonDblClick", "Double");
 
         // Extract nice & clean "modifier" from event details.
-        if (QString(inputType).compare(QString("Mouse")) == 0) {
-            modifier = "none";
-        }
-        else {
-            modifier = "something";
-        }
+        modifier = (inputType == "Mouse") ? "none" : "something";
         detailsList = details.split(';');
-        if (inputType == "Mouse") {
+        if (inputType.compare("Mouse") == 0) {
             modifier = detailsList[2];
-            if (modifier.length() == 0) {
+            if (modifier.length() == 0)
                 modifier = "none";
-            }
         }
         else {
             detailsList[2].replace(":", "");
@@ -109,7 +111,6 @@ void BarTreeVisualization::sendEventSequenceToWebView() {
                 modifier = "other";
             }
         }
-
 
         // Init inputTypeFrequency (1st level frequency counts).
         if (!inputTypeFrequency.contains(inputType)) {
