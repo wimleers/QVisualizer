@@ -24,8 +24,7 @@ SOURCES += MainWindow.cpp \
            Main.cpp \
            TimeLineVisualization.cpp \
            HeatMapVisualization.cpp \
-           BarTreeVisualization.cpp \
-           ClickLabel.cpp
+           BarTreeVisualization.cpp
 
 OTHER_FILES += sql.sql
 

@@ -16,7 +16,11 @@ class ClickLabel : public QLabel {
 
     protected:
 
-        void mousePressEvent(QMouseEvent * e);
+        void mousePressEvent(QMouseEvent *e) {
+            Q_UNUSED(e);
+
+            emit(clicked(e->pos()));
+        }
 
     signals:
         void clicked(QPoint);
