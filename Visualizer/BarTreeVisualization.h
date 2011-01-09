@@ -11,6 +11,7 @@
 #include <QMap>
 #include <QMutex>
 #include <QTimerEvent>
+#include <QTime>
 #include <QDebug>
 #include "Event.h"
 
@@ -28,7 +29,6 @@ signals:
 public slots:
     void loadHasFinished(bool ok);
     void eventSequenceChanged(QVector<Event *> * events);
-    void highlightEventLocation(int msecs, const QString & eventType);
 
 protected:
     void timerEvent(QTimerEvent *);
@@ -40,6 +40,8 @@ protected:
     QVector<Event *> * nextEventSequence;
     QMutex mutex;
     bool pageHasLoaded;
+    bool firstRenderDone;
+    int initialTimerID;
 };
 
 #endif // BARTREEVISUALIZATION_H

@@ -5,10 +5,13 @@ BarTreeVisualization::BarTreeVisualization(QWidget *parent) : QWebView(parent) {
     connect(this, SIGNAL(loadFinished(bool)), SLOT(loadHasFinished(bool)));
 
     // See explanation at BarTreeVisualization::timerEvent().
-    startTimer(BARTREEVISUALIZATION_DATA_REFRESH_INTERVAL);
+    this->initialTimerID = this->startTimer(20);
+    this->firstRenderDone = false;
 
     // Load the visualization in the web view.
     this->load(QUrl("qrc:/BarTree/BarTree.html"));
+    this->nextEventSequence = NULL;
+    this->currentEventSequence = NULL;
 }
 
 void BarTreeVisualization::loadHasFinished(bool ok) {
@@ -19,10 +22,6 @@ void BarTreeVisualization::eventSequenceChanged(QVector<Event *> * events) {
     this->mutex.lock();
     this->nextEventSequence = events;
     this->mutex.unlock();
-}
-
-void BarTreeVisualization::highlightEventLocation(int msecs, const QString & eventType) {
-    qDebug() << eventType;
 }
 
 /**
@@ -36,6 +35,12 @@ void BarTreeVisualization::timerEvent(QTimerEvent *) {
     // event sequence to the web view yet!
     if (!this->pageHasLoaded)
         return;
+
+    if (!this->firstRenderDone) {
+        this->firstRenderDone = true;
+        this->killTimer(this->initialTimerID);
+        this->startTimer(BARTREEVISUALIZATION_DATA_REFRESH_INTERVAL);
+    }
 
     // Make the next event sequence the current, if any, and send it to the
     // web view.
@@ -61,6 +66,8 @@ void BarTreeVisualization::sendEventSequenceToWebView() {
     QString inputType, eventType, modifier, details;
     QStringList detailsList;
     Event * event;
+    QTime timer;
+    timer.start();
 
     // Count frequencies.
     foreach (event, *this->currentEventSequence) {
@@ -217,9 +224,14 @@ void BarTreeVisualization::sendEventSequenceToWebView() {
     }
     data = level1;
 
+    qDebug() << "[BarTree] Calculated statistics in " << timer.elapsed() << "ms.";
+    timer.restart();
     QString json = QxtJSON::stringify(data);
-    qDebug() << "Generated JSON:" << json;
+    qDebug() << "[BarTree] Generated JSON in " << timer.elapsed() << "ms.";
+    timer.restart();
     this->mainFrame->evaluateJavaScript(QString("barTreeView.loadData(%1);").arg(json));
+    this->update();
+    qDebug() << "[BarTree] QWebView updated in " << timer.elapsed() << "ms.";
 }
 
 /**
@@ -230,7 +242,7 @@ double BarTreeVisualization::calcTotalFreq(const QMap<QString, int> & frequencie
     static double totalFrequency;
 
     totalFrequency = 0;
-    foreach(key, frequencies.keys()) {
+    foreach (key, frequencies.keys()) {
         totalFrequency += frequencies[key];
     }
 
