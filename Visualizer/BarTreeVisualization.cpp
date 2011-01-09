@@ -99,6 +99,32 @@ void BarTreeVisualization::sendEventSequenceToWebView() {
                 modifier = "none";
         }
         else {
+            // Clean the labels, so humans can actually understand them!
+            int key = detailsList[0].toInt();
+            // ASCII labels.
+            if (key >= 48 && key <= 122) {
+                detailsList[1] = (char) key;
+            }
+            // Arrows.
+            else if (key >= 16777234) {
+                switch (key) {
+                case 16777234:
+                    detailsList[1] = QString("arrow left");
+                    break;
+                case 16777235:
+                    detailsList[1] = QString("arrow up");
+                    break;
+                case 16777236:
+                    detailsList[1] = QString("arrow right");
+                    break;
+                case 16777237:
+                    detailsList[1] = QString("arrow down");
+                    break;
+                default:
+                    break;
+                }
+            }
+
             detailsList[2].replace(":", "");
             bool modifierKeyPressed = (detailsList[2].length() > 0);
             bool regularKeyPressed = (detailsList[1].length() > 0);
