@@ -16,6 +16,7 @@
 #include <QGraphicsView>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QDir>
 
 #include "Event.h"
 #include "ClickLabel.h"

@@ -378,8 +378,11 @@ void HeatMapVisualization::createCheckBoxes() {
 }
 
 QPixmap* HeatMapVisualization::determineBackgroundImage(int msecs) {
-    while(msecs > 0 && !QFile::exists("./screenshots/" + QString::number(msecs) + ".png"))
-        --msecs;
+    if(QDir().exists("./screenshots")) {
+        while(msecs > 0 && !QFile::exists("./screenshots/" + QString::number(msecs) + ".png"))
+            --msecs;
 
-    return (msecs == 0) ? new QPixmap() : new QPixmap("./screenshots/" + QString::number(msecs) + ".png");
+        return (msecs == 0) ? new QPixmap() : new QPixmap("./screenshots/" + QString::number(msecs) + ".png");
+    }
+    return new QPixmap();
 }
