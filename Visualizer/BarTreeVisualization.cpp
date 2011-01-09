@@ -68,14 +68,18 @@ void BarTreeVisualization::sendEventSequenceToWebView() {
         eventType = event->getEventType();
         details = event->getDetails();
 
+        // Ignore MouseButtonRelease events.
+        if (eventType.compare(QString("MouseButtonRelease")) == 0)
+            continue;
+
+        // Ignore MouseMove events.
+        if (eventType.compare(QString("MouseMove")) == 0)
+            continue;
+
         if (eventType.contains("Mouse"))
             inputType = QString("Mouse");
         else
             inputType = QString("Keyboard");
-
-        // Ignore MouseButtonRelease events.
-        if (eventType.compare(QString("MouseButtonRelease")) == 0)
-            continue;
 
         // Clean up event type for optimized display.
         eventType.replace("Key", "");
