@@ -63,7 +63,7 @@ void HeatMapVisualization::update(QVector<Event*> *events = NULL) {
     else
         return;
 
-    lastEventTime = events->last()->getTime();
+    lastEventTime = events->isEmpty() ? 0 : events->last()->getTime();
 
     int counter = 0, mouseRouteX = 0, mouseRouteY = 0;
     for(int i = 0; i < events->count(); ++i) {
