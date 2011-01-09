@@ -9005,8 +9005,7 @@ time,input type,event type,target widget class,details
 860209,Mouse,MouseMove,QDialogButtonBox 2,169;4;
 860226,Mouse,MouseMove,QDialogButtonBox 2,173;9;
 860243,Mouse,MouseMove,QDialogButtonBox 2,173;12;
-860740,,KeyRelease,QPushButton 2,16777220;
-;
+860740,,KeyRelease,QPushButton 2,16777220;;
 860819,Mouse,MouseMove,QWidget 1,370;258;
 860819,Mouse,MouseMove,SudokuView 1,370;258;
 860819,Mouse,MouseMove,SudokuView 1,370;258;
