@@ -42,8 +42,8 @@ HeatMapVisualization::HeatMapVisualization(Database *database) : QWidget() {
     mainLayout->addWidget(view, 0, Qt::AlignCenter);
 
     createCheckBoxes();
-    determineAvailableBackgroundImages(database->getMaxEventTime());
 
+    determineAvailableBackgroundImages(database->getMaxEventTime());
     renderVisualization();
 
     setLayout(mainLayout);
@@ -366,8 +366,10 @@ void HeatMapVisualization::determineAvailableBackgroundImages(int msecs) {
 }
 
 QImage* HeatMapVisualization::determineBackgroundImage(int msecs) {
-    return (availableBackgroundImages->contains(msecs)) ?
-            new QImage("./screenshots/" + QString::number(msecs) + ".png")
-                :
-            new QImage();
+    while(msecs > 0) {
+        if(availableBackgroundImages->contains(msecs))
+            return new QImage("./screenshots/" + QString::number(msecs) + ".png");
+        --msecs;
+    }
+    return new QImage();
 }
