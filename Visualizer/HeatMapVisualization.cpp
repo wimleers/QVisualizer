@@ -20,7 +20,7 @@ HeatMapVisualization::HeatMapVisualization(Database *database) : QWidget() {
 
     marge = 20;
     mouseRouteInterval = 1;
-    clickDeviation = 10;
+    clickThresholdArea = 10;
 
     showLeftClicks = showRightClicks = showSingleClicks = showDoubleClicks = showMouseMoveRoute = true;
     showMouseMove = false;
@@ -217,8 +217,8 @@ void HeatMapVisualization::highlightEventLocation(int msec) {
 
 void HeatMapVisualization::pixelSelected(QPointF p) {
     int numClicks = 0;
-    for (int i = -clickDeviation; i <= clickDeviation && p.y() + i < height; ++i)
-        for (int j = -clickDeviation; j <= clickDeviation && p.x() + j < width; ++j)
+    for (int i = -clickThresholdArea; i <= clickThresholdArea && p.y() + i < height; ++i)
+        for (int j = -clickThresholdArea; j <= clickThresholdArea && p.x() + j < width; ++j)
             if(p.x() + i > 0 && p.y() + j > 0)
                 numClicks += clickHeatMap[int(p.y()) + i][int(p.x()) + j];
 
@@ -286,6 +286,12 @@ void HeatMapVisualization::updateMouseRouteInterval(int interval) {
     update();
 }
 
+void HeatMapVisualization::updateClickThresholdArea(int threshold) {
+    clickThresholdArea = threshold;
+
+    update();
+}
+
 void HeatMapVisualization::createCheckBoxes() {
     QGroupBox *box1 = new QGroupBox();
     QVBoxLayout *vbox1 = new QVBoxLayout();
@@ -337,6 +343,12 @@ void HeatMapVisualization::createCheckBoxes() {
     mouseRouteIntervalSpinBox->setValue(mouseRouteInterval);
     connect(mouseRouteIntervalSpinBox, SIGNAL(valueChanged(int)), SLOT(updateMouseRouteInterval(int)));
 
+    QLabel *clickThresholdAreaLabel = new QLabel("Threshold of click area: ");
+    clickThresholdAreaSpinBox = new QSpinBox();
+    clickThresholdAreaSpinBox->setRange(1, 100);
+    clickThresholdAreaSpinBox->setValue(clickThresholdArea);
+    connect(clickThresholdAreaSpinBox, SIGNAL(valueChanged(int)), SLOT(updateClickThresholdArea(int)));
+
     QGroupBox *box4 = new QGroupBox();
     QVBoxLayout *vbox4 = new QVBoxLayout();
     QHBoxLayout *hbox4_1 = new QHBoxLayout();
@@ -345,8 +357,12 @@ void HeatMapVisualization::createCheckBoxes() {
     QHBoxLayout *hbox4_2 = new QHBoxLayout();
     hbox4_2->addWidget(mouseRouteIntervalLabel);
     hbox4_2->addWidget(mouseRouteIntervalSpinBox);
+    QHBoxLayout *hbox4_3 = new QHBoxLayout();
+    hbox4_3->addWidget(clickThresholdAreaLabel);
+    hbox4_3->addWidget(clickThresholdAreaSpinBox);
     vbox4->addLayout(hbox4_1);
     vbox4->addLayout(hbox4_2);
+    vbox4->addLayout(hbox4_3);
     box4->setLayout(vbox4);
 
     QHBoxLayout *inputLayout = new QHBoxLayout();

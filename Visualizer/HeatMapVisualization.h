@@ -36,7 +36,7 @@ class HeatMapVisualization : public QWidget {
         QCheckBox *showLeftClicksCheckBox, *showRightClicksCheckBox;
         QCheckBox *showSingleClicksCheckBox, *showDoubleClicksCheckBox;
         QCheckBox *showMouseMoveCheckBox, *showMouseMoveRouteCheckBox;;
-        QSpinBox *margeSpinBox, *mouseRouteIntervalSpinBox;
+        QSpinBox *margeSpinBox, *mouseRouteIntervalSpinBox, *clickThresholdAreaSpinBox;
 
         QVector<Event*> *lastEvents;
         QHash<int, bool> *availableBackgroundImages;
@@ -47,7 +47,7 @@ class HeatMapVisualization : public QWidget {
         QVector<QPoint> *mouseRoute;
 
         int maxClicks;
-        int marge, mouseRouteInterval, clickDeviation;
+        int marge, mouseRouteInterval, clickThresholdArea;
         int lastEventTime;
 
         bool showLeftClicks, showRightClicks, showSingleClicks, showDoubleClicks, showMouseMove, showMouseMoveRoute;
@@ -72,6 +72,7 @@ class HeatMapVisualization : public QWidget {
         void updateParameters(int state);
         void updateMarge(int marge);
         void updateMouseRouteInterval(int interval);
+        void updateClickThresholdArea(int threshold);
         void pixelSelected(QPointF p);
 
     public slots:
