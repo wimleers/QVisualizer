@@ -383,10 +383,10 @@ void HeatMapVisualization::createCheckBoxes() {
 
 void HeatMapVisualization::determineAvailableBackgroundImages(int msecs) {
     availableBackgroundImages = new QHash<int, bool>();
-    if(QDir().exists("./screenshots"))
-        for(; msecs > 0; --msecs)
-            if(QFile::exists("./screenshots/" + QString::number(msecs) + ".png"))
-                availableBackgroundImages->insert(msecs, true);
+    QString filename;
+    foreach(filename, QDir("./screenshots").entryList())
+        if(filename.contains(".png"))
+            availableBackgroundImages->insert((filename.split('.')[0]).toInt(), true);
 }
 
 QPixmap* HeatMapVisualization::determineBackgroundImage(int msecs) {
