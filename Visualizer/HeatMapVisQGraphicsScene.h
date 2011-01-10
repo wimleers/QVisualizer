@@ -35,9 +35,9 @@ class HeatMapVisQGraphicsScene: public QGraphicsScene {
     protected:
         void drawBackground(QPainter *painter, const QRectF &rect) {
             if (backgroundImage != NULL)
-                painter->drawImage(rect, backgroundImage->scaled(QSize(sceneRect().width(),sceneRect().height()), Qt::KeepAspectRatio));
+                painter->drawImage(rect, *backgroundImage/*->scaled(QSize(sceneRect().width(),sceneRect().height()), Qt::KeepAspectRatio)*/);
             if (foregroundImage != NULL)
-                painter->drawImage(rect, foregroundImage->scaled(QSize(sceneRect().width(),sceneRect().height()), Qt::KeepAspectRatio));
+                painter->drawImage(rect, *foregroundImage/*->scaled(QSize(sceneRect().width(),sceneRect().height()), Qt::KeepAspectRatio)*/);
         }
 
         void drawForeground(QPainter *painter, const QRectF &rect) {
