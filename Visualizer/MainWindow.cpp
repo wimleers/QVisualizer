@@ -1,5 +1,7 @@
 #include "MainWindow.h"
 
+#include <time.h>
+
 MainWindow::MainWindow(bool import, QWidget *parent) : QMainWindow(parent) {
     database = new Database(import);
     connect(database, SIGNAL(eventsLoaded(QVector<Event*> *)), SLOT(onEventsLoaded(QVector<Event*> *)));

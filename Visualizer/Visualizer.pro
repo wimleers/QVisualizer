@@ -17,7 +17,6 @@ HEADERS += MainWindow.h \
            BarTreeVisualization.h \
            CustomQGraphicsEllipseItem.h \
            TimeLineVisQGraphicsScene.h \
-           ClickLabel.h \
            HeatMapVisQGraphicsScene.h
 
 SOURCES += MainWindow.cpp \

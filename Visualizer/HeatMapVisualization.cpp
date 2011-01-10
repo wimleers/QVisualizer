@@ -30,19 +30,16 @@ HeatMapVisualization::HeatMapVisualization(Database *database) : QWidget() {
     screenHeight = (QApplication::desktop()->width() > 800) ? 500 : 300;
     screenHeight = (screenHeight > height) ? height : screenHeight;
 
-    image = new QImage(width, height, QImage::Format_ARGB32_Premultiplied);
+    heatMapImage = new QImage(width, height, QImage::Format_ARGB32_Premultiplied);
 
     scene = new HeatMapVisQGraphicsScene();
     view = new QGraphicsView(scene);
     view->setRenderHints(QPainter::Antialiasing);
     scene->setSceneRect(0, 0, screenWidth, screenHeight);
-
-    QPushButton *showImageButton = new QPushButton("Afbeelding in oorspronkelijke grootte");
-    connect(showImageButton, SIGNAL(clicked()), SLOT(showImage()));
+    connect(scene, SIGNAL(clicked(QPointF)), SLOT(pixelSelected(QPointF)));
 
     mainLayout = new QVBoxLayout();
-    mainLayout->addWidget(view/*heatMapLabel*/, 0, Qt::AlignCenter);
-    mainLayout->addWidget(showImageButton, 0, Qt::AlignCenter);
+    mainLayout->addWidget(view, 0, Qt::AlignCenter);
 
     createCheckBoxes();
     determineAvailableBackgroundImages(database->getMaxEventTime());
@@ -135,6 +132,8 @@ void HeatMapVisualization::renderVisualization() {
                 v = 0;
                 s = 255;
                 a = 0;
+                color.setHsv(h,v,s,a);
+                heatMapImage->setPixel(j, i, color.rgba());
             }
             else {// geklikt
                 s = 255;
@@ -142,7 +141,7 @@ void HeatMapVisualization::renderVisualization() {
 
                 v = value * 255.0;
 
-                a = v * 2/3;
+                a = v * 1/30;
 
                 if (value > 0.333){//matig tot veel geklikt => de kleuren geel tot rood hiervoor gebruiken
                     float inversDiff = 3/2, min = 1/3;
@@ -155,7 +154,7 @@ void HeatMapVisualization::renderVisualization() {
                         h = 0;
                         v = 255;//in deze omgeving is heel veel geklikt
                         s = 230;// => extra benadrukken
-                        a = 255;
+
                     }
                 }
                 else {// weinig geklikt (marge rond klik) => blauw tinten
@@ -167,16 +166,15 @@ void HeatMapVisualization::renderVisualization() {
                     h = color - (inversDiff * (value - min)) * colorRange;
                 }
                 //qDebug() << "color " << h << v << s;
-
+                color.setHsv(h,v,s,a);
+                heatMapImage->setPixel(j, i, color.rgba());
             }
-            color.setHsv(h,v,s,a);
-            image->setPixel(j, i, color.rgba());
         }
     }
 
     //muisbewigingen tekenen
     QPainter painter;
-    painter.begin(image);
+    painter.begin(heatMapImage);
     for(int i = 0; i + 1 < mouseRoute->size(); ++i){
         QLineF line(mouseRoute->at(i), mouseRoute->at(i+1));
 
@@ -184,10 +182,9 @@ void HeatMapVisualization::renderVisualization() {
     }
     painter.end();
 
-    scaledImage = image->scaled(QSize(screenWidth,screenHeight), Qt::KeepAspectRatio);
-
-    scene->addPixmap(*(determineBackgroundImage(lastEventTime)));
-    scene->addPixmap(QPixmap::fromImage(scaledImage));
+    scene->setBackgroundImage(determineBackgroundImage(lastEventTime));
+    scene->setForegroundImage(heatMapImage);
+    scene->invalidate();
 }
 
 void HeatMapVisualization::highlightEventLocation(int msec) {
@@ -202,32 +199,33 @@ void HeatMapVisualization::highlightEventLocation(int msec) {
                 QPoint p = QPoint(args.at(1).toInt(), args.at(0).toInt());
 
                 QPainter painter;
-                painter.begin(image);
+                painter.begin(heatMapImage);
                 painter.setBrush(QBrush(QColor(255,0,255)));
                 painter.drawEllipse(p, 5, 5);
 
                 painter.end();
             }
         }
-    scaledImage = image->scaled(QSize(screenWidth,screenHeight),Qt::KeepAspectRatio);
-    scene->addPixmap(*(determineBackgroundImage(lastEventTime)));
-    scene->addPixmap(QPixmap::fromImage(scaledImage));
+    scene->setBackgroundImage(&(determineBackgroundImage(lastEventTime)->scaled(QSize(screenWidth,screenHeight), Qt::KeepAspectRatio)));
+    scene->setForegroundImage(heatMapImage);
+    scene->invalidate();
 }
 
-void HeatMapVisualization::pixelSelected(QPoint p) {
-    update();
+void HeatMapVisualization::pixelSelected(QPointF p) {
     int numClicks = 0;
     for (int i = -clickDeviation; i <= clickDeviation && p.y() + i < height; ++i)
         for (int j = -clickDeviation; j <= clickDeviation && p.x() + j < width; ++j)
             if(p.x() + i > 0 && p.y() + j > 0)
-                numClicks += clickHeatMap[p.y() + i][p.x() + j];
+                numClicks += clickHeatMap[int(p.y()) + i][int(p.x()) + j];
 
-    QPainter painter;
-    painter.begin(image);
-    painter.drawText(p, QString::number(numClicks));
-    painter.end();
+    if(scene->numClicksLabel == NULL)
+        scene->numClicksLabel = scene->addText("");
 
-    imageClickLabel->setPixmap(QPixmap::fromImage(*image));
+    //scene->numClicksLabel->setPlainText(QString::number(numClicks));
+    scene->numClicksLabel->setHtml("<html><body bgcolor=\"white\"><p style=\"color: #000000;\">" + QString::number(numClicks) + "</p></body></html>");
+    scene->numClicksLabel->setPos(p);
+
+    scene->invalidate();
 }
 
 int HeatMapVisualization::max(int a, int b) {
@@ -283,30 +281,6 @@ void HeatMapVisualization::updateMouseRouteInterval(int interval) {
     mouseRouteInterval = interval;
 
     update();
-}
-
-void HeatMapVisualization::showImage() {
-    dialog = new QDialog();
-    QVBoxLayout *layout = new QVBoxLayout();
-
-    imageClickLabel = new ClickLabel();
-    imageClickLabel->setPixmap(QPixmap::fromImage(*image));
-    connect(imageClickLabel, SIGNAL(clicked(QPoint)), SLOT(pixelSelected(QPoint)));
-
-    QPushButton *okButton = new QPushButton("Ok");
-    connect(okButton, SIGNAL(clicked()), SLOT(closeDialog()));
-
-    layout->addWidget(imageClickLabel, 0, Qt::AlignCenter);
-    layout->addWidget(okButton, 0, Qt::AlignCenter);
-
-    dialog->setLayout(layout);
-
-    dialog->show();
-}
-
-void HeatMapVisualization::closeDialog() {
-    dialog->close();
-    delete dialog;
 }
 
 void HeatMapVisualization::createCheckBoxes() {
@@ -389,9 +363,9 @@ void HeatMapVisualization::determineAvailableBackgroundImages(int msecs) {
             availableBackgroundImages->insert((filename.split('.')[0]).toInt(), true);
 }
 
-QPixmap* HeatMapVisualization::determineBackgroundImage(int msecs) {
+QImage* HeatMapVisualization::determineBackgroundImage(int msecs) {
     return (availableBackgroundImages->contains(msecs)) ?
-            new QPixmap("./screenshots/" + QString::number(msecs) + ".png")
+            new QImage("./screenshots/" + QString::number(msecs) + ".png")
                 :
-            new QPixmap();
+            new QImage();
 }

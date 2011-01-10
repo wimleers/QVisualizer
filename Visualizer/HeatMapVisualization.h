@@ -17,21 +17,18 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QDir>
+#include <QGraphicsTextItem>
 
 #include "Event.h"
 #include "Database.h"
-#include "ClickLabel.h"
 #include "HeatMapVisQGraphicsScene.h"
 
 class HeatMapVisualization : public QWidget {
     Q_OBJECT
 
     private:
-        QDialog * dialog;
         QVBoxLayout *mainLayout;
-        QImage* image;
-        ClickLabel /**heatMapLabel, */*imageClickLabel;
-        QImage scaledImage;
+        QImage* heatMapImage;
 
         HeatMapVisQGraphicsScene *scene;
         QGraphicsView *view;
@@ -68,16 +65,14 @@ class HeatMapVisualization : public QWidget {
         void renderVisualization();
 
     private:
-        QPixmap* determineBackgroundImage(int msecs);
+        QImage* determineBackgroundImage(int msecs);
         void determineAvailableBackgroundImages(int msecs);
 
     private slots:
         void updateParameters(int state);
         void updateMarge(int marge);
         void updateMouseRouteInterval(int interval);
-        void showImage();
-        void closeDialog();
-        void pixelSelected(QPoint p);
+        void pixelSelected(QPointF p);
 
     public slots:
         void highlightEventLocation(int msec);

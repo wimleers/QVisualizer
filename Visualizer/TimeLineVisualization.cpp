@@ -26,7 +26,7 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
     //view->setGeometry(0, 0, 570, 200);
     //scene->setSceneRect(view->geometry());
     view->setRenderHints(QPainter::Antialiasing);
-    scene->setSceneRect(0, 0, (QApplication::desktop()->width() == 1920) ? 1050: 570, 200);
+    scene->setSceneRect(0, 0, (QApplication::desktop()->width() >= 1920) ? 1050: 570, 200);
 
     mainLayout = new QVBoxLayout();
     mainLayout->addLayout(timeValueLabelsLayout);
