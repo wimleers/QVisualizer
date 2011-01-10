@@ -30,10 +30,6 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
 
     image = new QImage(width, height, QImage::Format_ARGB32_Premultiplied);
 
-    //heatMapLabel = new ClickLabel();
-    //heatMapLabel->setPixmap(QPixmap::fromImage(*image));
-    //connect(heatMapLabel, SIGNAL(clicked(QPoint)), this, SLOT(pixelSelected(QPoint)));
-
     scene = new HeatMapVisQGraphicsScene();
     view = new QGraphicsView(scene);
     view->setRenderHints(QPainter::Antialiasing);
@@ -165,14 +161,13 @@ void HeatMapVisualization::renderVisualization() {
                 }
 
                 //qDebug() << "color " << h << v << s;
+
             }
             color.setHsv(h,v,s);
-            color.setAlpha(0);
-            image->setPixel(j, i, color.rgb());
+            color.setAlpha(75);
+            image->setPixel(j, i, color.rgba());
         }
     }
-    color.setHsv(255, 0, 255);
-    image->createMaskFromColor(color.rgb(), Qt::MaskOutColor);
 
     //muisbewigingen tekenen
     QPainter painter;
@@ -185,6 +180,7 @@ void HeatMapVisualization::renderVisualization() {
     painter.end();
 
     scaledImage = image->scaled(QSize(screenWidth,screenHeight), Qt::KeepAspectRatio);
+
     scene->addPixmap(*(determineBackgroundImage(lastEventTime)));
     scene->addPixmap(QPixmap::fromImage(scaledImage));
 }
