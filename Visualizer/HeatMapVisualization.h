@@ -19,6 +19,7 @@
 #include <QDir>
 
 #include "Event.h"
+#include "Database.h"
 #include "ClickLabel.h"
 #include "HeatMapVisQGraphicsScene.h"
 
@@ -41,6 +42,7 @@ class HeatMapVisualization : public QWidget {
         QSpinBox *margeSpinBox, *mouseRouteIntervalSpinBox;
 
         QVector<Event*> *lastEvents;
+        QHash<int, bool> *availableBackgroundImages;
 
         int height, width, screenHeight, screenWidth;
         int **heatMap;
@@ -59,7 +61,7 @@ class HeatMapVisualization : public QWidget {
         void createCheckBoxes();
 
     public:
-        HeatMapVisualization(QSize resolution);
+        HeatMapVisualization(Database *database);
         ~HeatMapVisualization() {}
 
         void update(QVector<Event*> *events);
@@ -67,6 +69,7 @@ class HeatMapVisualization : public QWidget {
 
     private:
         QPixmap* determineBackgroundImage(int msecs);
+        void determineAvailableBackgroundImages(int msecs);
 
     private slots:
         void updateParameters(int state);

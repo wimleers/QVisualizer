@@ -22,7 +22,7 @@ void MainWindow::closeEvent(QCloseEvent *e) {
    ---------
 */
 void MainWindow::createContent() {
-    heatMapVis = new HeatMapVisualization(database->getResolution());
+    heatMapVis = new HeatMapVisualization(database);
     barTreeVis = new BarTreeVisualization();
     timeLineVis = new TimeLineVisualization(database);
 

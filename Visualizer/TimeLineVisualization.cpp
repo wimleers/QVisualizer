@@ -10,7 +10,7 @@ TimeLineVisualization::TimeLineVisualization(Database *database) : QWidget() {
 
     timer = new QTimer();
     timer->setSingleShot(true);
-    timer->setInterval(500);
+    timer->setInterval(300);
     connect(timeSlider, SIGNAL(spanChanged(int, int)), timer, SLOT(start()));
     connect(timer, SIGNAL(timeout()), SLOT(onTimeout()));
 

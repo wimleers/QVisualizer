@@ -1,10 +1,10 @@
 #include "HeatMapVisualization.h"
 
-HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
+HeatMapVisualization::HeatMapVisualization(Database *database) : QWidget() {
 
     lastEvents = NULL;
-    height = resolution.height();
-    width = resolution.width();
+    height = database->getResolution().height();
+    width = database->getResolution().width();
 
     heatMap = new int*[height];
     for (int i = 0; i < height; ++i)
@@ -43,6 +43,7 @@ HeatMapVisualization::HeatMapVisualization(QSize resolution) : QWidget() {
     mainLayout->addWidget(showImageButton, 0, Qt::AlignCenter);
 
     createCheckBoxes();
+    determineAvailableBackgroundImages(database->getMaxEventTime());
 
     renderVisualization();
 
@@ -374,12 +375,17 @@ void HeatMapVisualization::createCheckBoxes() {
     mainLayout->addLayout(inputLayout);
 }
 
-QPixmap* HeatMapVisualization::determineBackgroundImage(int msecs) {
-    if(QDir().exists("./screenshots")) {
-        while(msecs > 0 && !QFile::exists("./screenshots/" + QString::number(msecs) + ".png"))
-            --msecs;
+void HeatMapVisualization::determineAvailableBackgroundImages(int msecs) {
+    availableBackgroundImages = new QHash<int, bool>();
+    if(QDir().exists("./screenshots"))
+        for(; msecs > 0; --msecs)
+            if(QFile::exists("./screenshots/" + QString::number(msecs) + ".png"))
+                availableBackgroundImages->insert(msecs, true);
+}
 
-        return (msecs == 0) ? new QPixmap() : new QPixmap("./screenshots/" + QString::number(msecs) + ".png");
-    }
-    return new QPixmap();
+QPixmap* HeatMapVisualization::determineBackgroundImage(int msecs) {
+    return (availableBackgroundImages->contains(msecs)) ?
+            new QPixmap("./screenshots/" + QString::number(msecs) + ".png")
+                :
+            new QPixmap();
 }
