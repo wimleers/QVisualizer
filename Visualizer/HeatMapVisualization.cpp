@@ -26,7 +26,9 @@ HeatMapVisualization::HeatMapVisualization(Database *database) : QWidget() {
     showMouseMove = false;
 
     screenWidth = (QApplication::desktop()->width() >= 1920) ? 1050: 470;
+    screenWidth = (screenWidth > width) ? width : screenWidth;
     screenHeight = (QApplication::desktop()->width() > 800) ? 500 : 300;
+    screenHeight = (screenHeight > height) ? height : screenHeight;
 
     image = new QImage(width, height, QImage::Format_ARGB32_Premultiplied);
 
@@ -187,6 +189,7 @@ void HeatMapVisualization::renderVisualization() {
 }
 
 void HeatMapVisualization::highlightEventLocation(int msec) {
+    update();
     for (int i = 0; i < lastEvents->size(); ++i)
         if (lastEvents->at(i)->getTime() == msec) {
             QString details = lastEvents->at(i)->getDetails();
@@ -210,6 +213,7 @@ void HeatMapVisualization::highlightEventLocation(int msec) {
 }
 
 void HeatMapVisualization::pixelSelected(QPoint p) {
+    update();
     int numClicks = 0;
     for (int i = -clickDeviation; i <= clickDeviation && p.y() + i < height; ++i)
         for (int j = -clickDeviation; j <= clickDeviation && p.x() + j < width; ++j)
