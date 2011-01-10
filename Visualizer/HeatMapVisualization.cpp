@@ -61,7 +61,8 @@ void HeatMapVisualization::update(QVector<Event*> *events = NULL) {
 
     lastEventTime = events->isEmpty() ? 0 : events->last()->getTime();
 
-    scene->removeItem(scene->numClicksLabel);
+    if(scene->numClicksLabel != NULL)
+        scene->removeItem(scene->numClicksLabel);
     scene->numClicksLabel = NULL;
 
     int counter = 0, mouseRouteX = 0, mouseRouteY = 0;
