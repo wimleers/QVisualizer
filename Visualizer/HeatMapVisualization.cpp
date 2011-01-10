@@ -126,7 +126,7 @@ void HeatMapVisualization::clickOnHeatMap(int x, int y) {
 
 void HeatMapVisualization::renderVisualization() {
     QColor color;
-    int h, v, s;
+    int h, v, s, a;
 
     for (int i = 0; i < height; ++i) {
         for (int j = 0; j < width; ++j) {
@@ -134,12 +134,15 @@ void HeatMapVisualization::renderVisualization() {
                 h = 255;
                 v = 0;
                 s = 255;
+                a = 0;
             }
             else {// geklikt
                 s = 255;
                 float value = float(heatMap[i][j])/float(maxClicks);// verhouding: is op deze plaats veel geklikt
 
                 v = value * 255.0;
+
+                a = v * 2/3;
 
                 if (value > 0.333){//matig tot veel geklikt => de kleuren geel tot rood hiervoor gebruiken
                     float inversDiff = 3/2, min = 1/3;
@@ -152,6 +155,7 @@ void HeatMapVisualization::renderVisualization() {
                         h = 0;
                         v = 255;//in deze omgeving is heel veel geklikt
                         s = 230;// => extra benadrukken
+                        a = 255;
                     }
                 }
                 else {// weinig geklikt (marge rond klik) => blauw tinten
@@ -162,12 +166,10 @@ void HeatMapVisualization::renderVisualization() {
                     //240 blauw
                     h = color - (inversDiff * (value - min)) * colorRange;
                 }
-
                 //qDebug() << "color " << h << v << s;
 
             }
-            color.setHsv(h,v,s);
-            color.setAlpha(75);
+            color.setHsv(h,v,s,a);
             image->setPixel(j, i, color.rgba());
         }
     }
