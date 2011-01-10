@@ -61,6 +61,9 @@ void HeatMapVisualization::update(QVector<Event*> *events = NULL) {
 
     lastEventTime = events->isEmpty() ? 0 : events->last()->getTime();
 
+    scene->removeItem(scene->numClicksLabel);
+    scene->numClicksLabel = NULL;
+
     int counter = 0, mouseRouteX = 0, mouseRouteY = 0;
     for(int i = 0; i < events->count(); ++i) {
         if((showSingleClicks && events->at(i)->getEventType().compare("MouseButtonPress") == 0) ||
@@ -221,7 +224,6 @@ void HeatMapVisualization::pixelSelected(QPointF p) {
     if(scene->numClicksLabel == NULL)
         scene->numClicksLabel = scene->addText("");
 
-    //scene->numClicksLabel->setPlainText(QString::number(numClicks));
     scene->numClicksLabel->setHtml("<html><body bgcolor=\"white\"><p style=\"color: #000000;\">" + QString::number(numClicks) + "</p></body></html>");
     scene->numClicksLabel->setPos(p);
 
