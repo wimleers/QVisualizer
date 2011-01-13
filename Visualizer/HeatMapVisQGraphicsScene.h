@@ -5,6 +5,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QDebug>
 #include <QPainter>
+#include <QGraphicsEllipseItem>
 
 class HeatMapVisQGraphicsScene: public QGraphicsScene {
     Q_OBJECT
@@ -14,10 +15,12 @@ class HeatMapVisQGraphicsScene: public QGraphicsScene {
 
     public:
         QGraphicsTextItem *numClicksLabel;
+        QGraphicsEllipseItem *timeLineClickLocation;
 
         HeatMapVisQGraphicsScene() : QGraphicsScene() {
             backgroundImage = NULL;
             numClicksLabel = NULL;
+            timeLineClickLocation = NULL;
         }
 
         void mouseReleaseEvent(QGraphicsSceneMouseEvent *mouseEvent) {

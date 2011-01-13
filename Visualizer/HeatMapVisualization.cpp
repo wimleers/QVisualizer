@@ -64,6 +64,9 @@ void HeatMapVisualization::update(QVector<Event*> *events = NULL) {
     if(scene->numClicksLabel != NULL)
         scene->removeItem(scene->numClicksLabel);
     scene->numClicksLabel = NULL;
+    if (scene->timeLineClickLocation != NULL)
+        scene->removeItem(scene->timeLineClickLocation);
+    scene->timeLineClickLocation = NULL;
 
     int counter = 0, mouseRouteX = 0, mouseRouteY = 0;
     for(int i = 0; i < events->count(); ++i) {
@@ -201,17 +204,23 @@ void HeatMapVisualization::highlightEventLocation(int msec) {
             QStringList args = details.split(";");
             if (args.count() >= 2) {
                 QPoint p = QPoint(args.at(1).toInt(), args.at(0).toInt());
+                if (p.x() -5 > 0)//midden van bolleke waar geklikt is
+                    p.setX(p.x() - 5);
+                if (p.y() - 5 > 0)
+                    p.setY(p.y() - 5);
 
-                QPainter painter;
+                /*QPainter painter;
                 painter.begin(heatMapImage);
                 painter.setBrush(QBrush(QColor(255,0,255)));
                 painter.drawEllipse(p, 5, 5);
 
-                painter.end();
+                painter.end();*/
+                scene->timeLineClickLocation = scene->addEllipse(QRectF(0,0,10,10),QPen(), QBrush(QColor(255,0,255)));
+                scene->timeLineClickLocation->setPos(p);
             }
         }
-    scene->setBackgroundImage(&(determineBackgroundImage(lastEventTime)->scaled(QSize(screenWidth,screenHeight), Qt::KeepAspectRatio)));
-    scene->setForegroundImage(heatMapImage);
+    //scene->setBackgroundImage(determineBackgroundImage(lastEventTime));
+    //scene->setForegroundImage(heatMapImage);
     scene->invalidate();
 }
 
